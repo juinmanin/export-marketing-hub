@@ -18,7 +18,8 @@
     showFatal(reason);
   });
 
-  const KEY = "emh-prd2-lite-v2";
+  const KEY = "emh-prd2-lite-v3";
+  const BUILD = "2026.03.14.1";
   const NAV = [
     ["dashboard", "Dashboard"],
     ["help", "Help"],
@@ -335,7 +336,7 @@
           <div class="lockup"><div class="mark">EMH</div><div><div class="eyebrow">Export Marketing Hub</div><h1>승인형 산출물 운영</h1></div></div>
           <div class="ws-card"><div class="eyebrow">${t("workspace")}</div><strong>${text(ws().company)}</strong><span>${text(brand().name)} · ${text(ws().project)}</span><div class="bar"><span style="width:${ready()}%"></span></div><small>${ready()}% ready</small></div>
           <nav class="nav">${NAV.map(([id]) => `<button type="button" class="${v === id ? "active" : ""}" data-nav="${id}">${t(id)}</button>`).join("")}</nav>
-          <div class="rail-note"><span class="pill role-pill">${text(state.me.role)}</span><p>${t("current_user")}: ${text(state.me.name)}</p></div>
+          <div class="rail-note"><span class="pill role-pill">${text(state.me.role)}</span><p>${t("current_user")}: ${text(state.me.name)}</p><p>Build ${BUILD}</p></div>
         </aside>
         <div class="stage">
           <header class="top"><div><div class="eyebrow">${t("current_context")}</div><strong>${text(ws().company)}</strong><span class="chip">${text(brand().name)}</span></div><div class="top-actions"><label class="inline-select"><span>${t("locale")}</span><select name="locale" data-setting><option value="ko" ${locale()==="ko"?"selected":""}>KO</option><option value="en" ${locale()==="en"?"selected":""}>EN</option><option value="ja" ${locale()==="ja"?"selected":""}>JP</option><option value="zh" ${locale()==="zh"?"selected":""}>ZH</option></select></label><button type="button" class="ghost" data-nav="help">${t("help")}</button><button type="button" class="ghost" data-nav="onboarding">${t("onboarding")}</button><button type="button" class="ghost" data-nav="studio">${t("new_output")}</button></div></header>
@@ -584,9 +585,27 @@
   function ping(msg) { toast = msg; clearTimeout(window.__emhToast); window.__emhToast = setTimeout(() => { toast = ""; render(); }, 2000); }
   function nextVer(v) { const a = v.split(".").map(Number); a[2] = (a[2] || 0) + 1; return a.join("."); }
 
-  if ("serviceWorker" in navigator && location.protocol.startsWith("http")) {
-    navigator.serviceWorker.register("./sw.js").catch(() => {});
+  function clearRuntimeCaches() {
+    if (!("caches" in window)) return Promise.resolve();
+    return caches.keys().then((keys) =>
+      Promise.all(keys.filter((key) => key.startsWith("export-marketing-hub-")).map((key) => caches.delete(key)))
+    );
   }
+
+  function setupServiceWorker() {
+    if (!("serviceWorker" in navigator) || !location.protocol.startsWith("http")) return;
+    const isLocal = /^(localhost|127\.0\.0\.1)$/i.test(location.hostname);
+    if (isLocal) {
+      navigator.serviceWorker.getRegistrations()
+        .then((registrations) => Promise.all(registrations.map((registration) => registration.unregister())))
+        .then(() => clearRuntimeCaches())
+        .catch(() => {});
+      return;
+    }
+    navigator.serviceWorker.register(`./sw.js?v=${BUILD}`).catch(() => {});
+  }
+
+  setupServiceWorker();
 
   try {
     render();
