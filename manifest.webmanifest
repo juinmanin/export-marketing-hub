@@ -1,0 +1,11 @@
+{
+  "name": "Export Marketing Hub",
+  "short_name": "EMH",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#f4f1ea",
+  "theme_color": "#1f6f61",
+  "lang": "ko",
+  "description": "수출기업용 마케팅 산출물 운영 허브",
+  "icons": []
+}
