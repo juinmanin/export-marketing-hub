@@ -18,8 +18,8 @@
     showFatal(reason);
   });
 
-  const KEY = "emh-prd2-lite-v3";
-  const BUILD = "2026.03.14.1";
+  const KEY = "emh-prd2-lite-v4";
+  const BUILD = "2026.03.14.2";
   const NAV = [
     ["dashboard", "Dashboard"],
     ["help", "Help"],
@@ -135,6 +135,7 @@
   function text(v) { return String(v || "").replace(/[&<>"]/g, (m) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[m])); }
   function avg(a) { return a.length ? Math.round(a.reduce((x, y) => x + y, 0) / a.length) : 0; }
   function locale() { return state.ui.locale || "ko"; }
+  function l() { return locale(); }
   function t(key) {
     const dict = {
       ko: { help: "사용설명", new_output: "새 산출물", workspace: "작업공간", current_context: "현재 컨텍스트", role: "권한", current_user: "현재 사용자", review_gate: "자동 검수 체크리스트", no_issue: "문제 없음", approve: "승인 저장", duplicate: "새 버전 복제", gold: "Gold Sample 등록", regenerate: "재생성", save_edit: "수정 저장", lock: "잠금", unlock: "잠금 해제", generated: "생성 완료", guide: "가이드", locale: "언어", onboarding_done: "온보딩 완료", dashboard: "대시보드", onboarding: "온보딩", brand: "브랜드", products: "제품", studio: "스튜디오", repository: "보관함", playbooks: "플레이북", prompts: "프롬프트", quality: "품질", admin: "운영" },
@@ -185,6 +186,310 @@
     return (dict[localeOf(s)] && dict[localeOf(s)][key]) || dict.ko[key] || key;
   }
 
+  function marketLangCode(m) {
+    const raw = `${m?.lang || ""}`.toLowerCase();
+    if (raw.includes("ja") || raw.includes("일")) return "ja";
+    if (raw.includes("zh") || raw.includes("중")) return "zh";
+    if (raw.includes("en") || raw.includes("영")) return "en";
+    return "ko";
+  }
+
+  function localizedPhrase(code, map) {
+    return map[code] || map.ko || "";
+  }
+
+  function benefitSummary(p) {
+    return (p.features || []).slice(0, 3).join(", ");
+  }
+
+  function factSummary(p) {
+    return [`스펙 ${p.specs.join(", ")}`, `가격 ${p.price}`, `배송 ${p.shipping}`, `반품 ${p.returns}`].join(" / ");
+  }
+
+  function seoKeywords(b, p, m) {
+    return [b.name, p.name, m.country, p.cat, "giftable beauty", "refillable", "K-beauty export"].filter(Boolean);
+  }
+
+  function buildBlogPack(s, p, m, brief) {
+    const b = brandOf(s);
+    const code = marketLangCode(m);
+    const keywords = seoKeywords(b, p, m);
+    const titles = {
+      ko: [
+        `${m.country} 시장에서 통하는 선물형 핸드케어: ${p.name}`,
+        `${b.name} ${p.name}, 향과 리필 경험을 함께 제안하는 방법`,
+        `선물, 향, 리필을 한 번에 설명하는 ${p.name} 블로그 구조`
+      ],
+      en: [
+        `${p.name}: a gift-ready hand care set for ${m.country} buyers`,
+        `How ${b.name} turns scent, refill, and gifting into one product story`,
+        `A search-friendly blog angle for ${p.name} in the ${m.country} market`
+      ],
+      ja: [
+        `${m.country}市場向けに伝える ${p.name} のギフト提案`,
+        `${b.name} が香り・リフィル・ギフト体験をつなぐ方法`,
+        `${p.name} を検索流入向けに紹介するブログ構成`
+      ],
+      zh: [
+        `${p.name}：面向${m.country}市场的礼赠型手部护理套装`,
+        `${b.name} 如何把香气、补充装与送礼场景连成一个故事`,
+        `适合 ${m.country} 市场搜索流量的 ${p.name} 博客结构`
+      ]
+    };
+    const outline = localizedPhrase(code, {
+      ko: `검색 의도: ${keywords.slice(0, 4).join(", ")}\n글 각도: 브랜드 스토리보다 제품 Truth를 먼저 보여 주고, 마지막에 선물 경험으로 감성 연결\n권장 구조: 문제 인식 -> 제품 사실 -> 사용 장면 -> 배송/반품 신뢰 -> CTA`,
+      en: `Search intent: ${keywords.slice(0, 4).join(", ")}\nAngle: lead with product truth, then connect it back to the brand story through gifting\nStructure: reader pain point -> product facts -> use case -> shipping trust -> CTA`,
+      ja: `検索意図: ${keywords.slice(0, 4).join(", ")}\n切り口: ブランド感性より先に製品Truthを提示し、最後にギフト体験として接続\n構成: 課題 -> 製品事実 -> 使用シーン -> 配送信頼 -> CTA`,
+      zh: `搜索意图：${keywords.slice(0, 4).join(", ")}\n角度：先讲产品事实，再用送礼场景把品牌故事连起来\n结构：问题认知 -> 产品事实 -> 使用场景 -> 配送信任 -> CTA`
+    });
+    const body = localizedPhrase(code, {
+      ko: `## 왜 이 제품이 지금 필요한가\n해외 바이어와 소비자는 감성적인 설명만으로는 구매를 결정하지 않습니다. ${m.country} 시장에서는 ${m.note} 같은 맥락이 중요하고, 제품이 어떤 상황에서 바로 이해되는지가 먼저 보입니다.\n\n## 제품 Truth 요약\n${p.name}는 ${benefitSummary(p)}를 중심으로 설계된 ${p.cat} 제품입니다. 특히 ${p.features[2] || p.features[0]}와 ${p.features[3] || p.features[1]} 조합은 선물성과 재사용성을 동시에 설명하기 좋습니다.\n\n- 핵심 스펙: ${p.specs.join(", ")}\n- 가격: ${p.price}\n- 배송 정책: ${p.shipping}\n- 반품 정책: ${p.returns}\n\n## ${m.country} 시장용 메시지 포인트\n1. 첫 문단에서는 브랜드 철학보다 구매 이유를 먼저 제시합니다.\n2. 두 번째 블록에서 향, 패키지, 리필 구조를 분리해 설명합니다.\n3. 배송과 반품 조건을 명확히 넣어 cross-border 구매 불안을 낮춥니다.\n\n## 브랜드 스토리 연결\n${b.story}\n이 문장은 감성 소개용으로 쓰되, 본문 중반 이후에 배치해 제품 정보보다 앞서지 않게 구성하는 것이 좋습니다.\n\n## 바로 활용 가능한 CTA\n상세페이지에서 향 옵션, 구성품, 배송 조건을 확인하고 현재 시장에 맞는 메시지 버전으로 바로 전환해 보세요.\n\n추가 요청 반영: ${brief}`,
+      en: `## Why this product matters now\nBuyers do not convert on brand mood alone. In the ${m.country} market, ${m.note} matters because the product has to explain itself quickly in a cross-border buying context.\n\n## Product truth first\n${p.name} is a ${p.cat} offer built around ${benefitSummary(p)}. The strongest conversion angle is to separate the gift-ready experience from the refillable product logic so each buying reason is clear.\n\n- Specs: ${p.specs.join(", ")}\n- Price: ${p.price}\n- Shipping: ${p.shipping}\n- Returns: ${p.returns}\n\n## Messaging for ${m.country}\n1. Open with the buying reason, not the brand philosophy.\n2. Split scent, packaging, and refill logic into separate proof blocks.\n3. Add shipping and returns early to reduce trust friction.\n\n## Brand connection\n${b.story}\nUse the story after the factual product block so it supports the sale rather than delaying it.\n\n## CTA\nMove the reader to the detail page to compare scent options, bundle components, and shipping conditions.\n\nRequested angle: ${brief}`,
+      ja: `## なぜ今この製品なのか\n海外向け販促では感性表現だけでは不十分です。${m.country}市場では ${m.note} のような文脈が重要で、製品がすぐ理解できることが優先されます。\n\n## 製品Truthを先に見せる\n${p.name} は ${benefitSummary(p)} を中心に設計された ${p.cat} 製品です。特に ${p.features[2] || p.features[0]} と ${p.features[3] || p.features[1]} の組み合わせは、ギフト性と再使用性を同時に伝えやすい構成です。\n\n- スペック: ${p.specs.join(", ")}\n- 価格: ${p.price}\n- 配送: ${p.shipping}\n- 返品: ${p.returns}\n\n## ${m.country} 市場向けメッセージ\n1. 冒頭ではブランド哲学より購入理由を先に提示します。\n2. 香り、パッケージ、リフィル構造を分けて説明します。\n3. 配送と返品条件を早めに入れて不安を下げます。\n\n## ブランドストーリー接続\n${b.story}\nこの説明は中盤以降に置き、事実情報の後押しとして使うのが効果的です。\n\n## CTA\n詳細ページで香り、構成、配送条件を確認できる導線を作ります。\n\n追加要望: ${brief}`,
+      zh: `## 为什么现在适合推这款产品\n面向海外市场时，单靠品牌情绪无法转化。对 ${m.country} 市场来说，${m.note} 这样的语境更重要，用户需要很快看懂产品适合什么场景。\n\n## 先讲产品事实\n${p.name} 是围绕 ${benefitSummary(p)} 设计的 ${p.cat} 产品。尤其是 ${p.features[2] || p.features[0]} 与 ${p.features[3] || p.features[1]} 的组合，能够同时说明礼赠价值与可持续使用逻辑。\n\n- 规格: ${p.specs.join(", ")}\n- 价格: ${p.price}\n- 配送: ${p.shipping}\n- 退换: ${p.returns}\n\n## 面向 ${m.country} 的表达重点\n1. 开头先说购买理由，而不是品牌理念。\n2. 将香气、包装、补充装结构拆开说明。\n3. 提前放入配送和退换信息，降低跨境购买顾虑。\n\n## 与品牌故事连接\n${b.story}\n这部分建议放在中后段，让品牌故事服务于转化，而不是挡在事实信息前面。\n\n## CTA\n引导用户进入详情页比较香型、组合内容和配送条件。\n\n额外要求：${brief}`
+    });
+    const meta = localizedPhrase(code, {
+      ko: `${b.name} ${p.name}의 향, 선물 구성, 리필 포인트를 ${m.country} 시장 관점에서 정리한 SEO형 소개 글.`,
+      en: `An SEO-focused overview of ${b.name} ${p.name}, covering scent, gifting logic, refill value, and shipping trust for the ${m.country} market.`,
+      ja: `${m.country} 市場向けに ${b.name} ${p.name} の香り、ギフト性、リフィル価値、配送信頼を整理したSEO紹介文。`,
+      zh: `面向 ${m.country} 市场整理的 SEO 介绍文，涵盖 ${b.name} ${p.name} 的香气、礼赠价值、补充装逻辑与配送信任。`
+    });
+    const cta = localizedPhrase(code, {
+      ko: `상세페이지에서 향 옵션, 구성품, 배송 조건을 확인하고 ${m.country} 시장용 메시지 버전을 바로 적용해 보세요.`,
+      en: `Open the product page to compare scent options, bundle details, and shipping terms, then adapt the message for the ${m.country} market.`,
+      ja: `詳細ページで香りの選択肢、構成内容、配送条件を確認し、${m.country} 向けメッセージにそのまま展開してください。`,
+      zh: `进入详情页查看香型、组合内容与配送条件，并直接扩展为面向 ${m.country} 市场的传播文案。`
+    });
+    const imagePrompt = `${b.name} ${p.name}, editorial still life, premium giftable hand care, refillable case visible, ${m.country} market mood, clean ivory background, SEO blog hero image`;
+    return [titles[code].join("\n"), outline, body, meta, cta, imagePrompt];
+  }
+
+  function buildSocialPack(s, p, m, brief) {
+    const b = brandOf(s);
+    const code = marketLangCode(m);
+    return [
+      localizedPhrase(code, {
+        ko: `${p.features[2] || p.features[0]}이 먼저 보이면 구매 이유가 빨라집니다.`,
+        en: `When the gift-ready detail lands first, the buying reason becomes obvious.`,
+        ja: `ギフトとして伝わる要素が先に見えると、購入理由が早く伝わります。`,
+        zh: `当礼赠价值先被看见时，购买理由就会更快成立。`
+      }),
+      localizedPhrase(code, {
+        ko: `${b.name} ${p.name}는 향만 강조하지 않습니다. ${p.features[2] || p.features[0]}, ${p.features[3] || p.features[1]}, 그리고 ${p.shipping} 기준의 배송 신뢰까지 함께 보여 주는 것이 전환에 더 가깝습니다.\n\n${m.country} 시장용 포인트: ${m.note}\n추가 요청 반영: ${brief}`,
+        en: `${b.name} ${p.name} should not be framed as scent alone. Conversion improves when you separate the gift-ready bundle, the refillable product logic, and the shipping trust layer.\n\nMarket note for ${m.country}: ${m.note}\nRequested angle: ${brief}`,
+        ja: `${b.name} ${p.name} は香りだけで見せるより、ギフト構成、リフィル構造、配送信頼を分けて伝える方が転換につながります。\n\n${m.country} 市場メモ: ${m.note}\n追加要望: ${brief}`,
+        zh: `${b.name} ${p.name} 不应只讲香气。把礼赠组合、补充装逻辑和配送信任拆开表达，转化会更稳。\n\n${m.country} 市场备注：${m.note}\n额外要求：${brief}`
+      }),
+      localizedPhrase(code, {
+        ko: `향을 파는 글이 아니라, 선물 이유와 재구매 이유를 동시에 보여 주는 카피로 바꿔 보세요.`,
+        en: `Shift from “selling scent” to showing both the gifting reason and the repeat-purchase reason.`,
+        ja: `香りを売る表現ではなく、ギフト理由と再購入理由を同時に見せるコピーに変えてみてください。`,
+        zh: `不要只卖“香气”，而要同时写出送礼理由和复购理由。`
+      }),
+      localizedPhrase(code, {
+        ko: `어떤 포인트가 가장 먼저 클릭을 만들 것 같은지 답글로 남겨 주세요.`,
+        en: `Reply with the angle that would earn the first click in your market.`,
+        ja: `最初のクリックにつながる角度はどれか、返信で教えてください。`,
+        zh: `欢迎回复你认为最能带来首次点击的表达角度。`
+      }),
+      `#${b.name.replace(/\s+/g, "")} #${m.country.replace(/\s+/g, "")} #giftablebeauty #refillable #exportmarketing`
+    ];
+  }
+
+  function buildPdpPack(s, p, m, brief) {
+    const b = brandOf(s);
+    const code = marketLangCode(m);
+    return [
+      localizedPhrase(code, {
+        ko: `${p.features[2] || p.features[0]}와 ${p.features[3] || p.features[1]}를 한 번에 보여 주는 ${b.name} ${p.name}`,
+        en: `${b.name} ${p.name}: a gift-ready bundle that also makes the refill story clear`,
+        ja: `${b.name} ${p.name}：ギフト性とリフィル価値を同時に伝える構成`,
+        zh: `${b.name} ${p.name}：同时讲清礼赠价值与补充装逻辑的详情页开头`
+      }),
+      localizedPhrase(code, {
+        ko: `1. 선물로 바로 이해되는 구성: ${p.features[2] || p.features[0]}\n2. 재사용 동기를 만드는 구조: ${p.features[3] || p.features[1]}\n3. 사용 순간이 연상되는 텍스처/향 설명: ${p.features[0]}\n4. ${m.country} 시장 적합성: ${m.note}`,
+        en: `1. Gift-ready logic: ${p.features[2] || p.features[0]}\n2. Reuse logic: ${p.features[3] || p.features[1]}\n3. Sensory value: ${p.features[0]}\n4. Market fit for ${m.country}: ${m.note}`,
+        ja: `1. ギフト性: ${p.features[2] || p.features[0]}\n2. 再使用価値: ${p.features[3] || p.features[1]}\n3. 体験価値: ${p.features[0]}\n4. ${m.country} 市場適合性: ${m.note}`,
+        zh: `1. 礼赠价值：${p.features[2] || p.features[0]}\n2. 复用价值：${p.features[3] || p.features[1]}\n3. 感官体验：${p.features[0]}\n4. ${m.country} 市场匹配点：${m.note}`
+      }),
+      localizedPhrase(code, {
+        ko: `- 제품명: ${p.name}\n- 카테고리: ${p.cat}\n- 스펙: ${p.specs.join(", ")}\n- 가격: ${p.price}\n- 추가 요청 반영: ${brief}`,
+        en: `- Product: ${p.name}\n- Category: ${p.cat}\n- Specs: ${p.specs.join(", ")}\n- Price: ${p.price}\n- Requested angle: ${brief}`,
+        ja: `- 商品名: ${p.name}\n- カテゴリ: ${p.cat}\n- スペック: ${p.specs.join(", ")}\n- 価格: ${p.price}\n- 追加要望: ${brief}`,
+        zh: `- 产品名：${p.name}\n- 类别：${p.cat}\n- 规格：${p.specs.join(", ")}\n- 价格：${p.price}\n- 补充要求：${brief}`
+      }),
+      localizedPhrase(code, {
+        ko: `배송: ${p.shipping}\n반품: ${p.returns}\n운영 메모: cross-border 구매자는 배송 예상과 반품 가능 범위를 한 블록에서 바로 확인해야 합니다.`,
+        en: `Shipping: ${p.shipping}\nReturns: ${p.returns}\nOps note: cross-border buyers need delivery timing and return scope in one easy block.`,
+        ja: `配送: ${p.shipping}\n返品: ${p.returns}\n運用メモ: 越境購入者は配送目安と返品条件を同じブロックで確認できる必要があります。`,
+        zh: `配送：${p.shipping}\n退换：${p.returns}\n运营备注：跨境购买者需要在同一信息块中快速看到物流时效与退换范围。`
+      }),
+      localizedPhrase(code, {
+        ko: `Q. 이 제품은 어떤 고객에게 맞나요?\nA. 선물성, 향 경험, 리필 구조를 함께 찾는 고객에게 적합합니다.\n\nQ. 어떤 정보부터 보여 줘야 하나요?\nA. Hero에서는 선물 이유, 중간 블록에서는 스펙과 구성, 하단에서는 배송/반품을 배치하는 순서가 좋습니다.`,
+        en: `Q. Who is this product for?\nA. Buyers looking for a giftable product with scent value and refill logic.\n\nQ. What should appear first on the page?\nA. Lead with the gift reason, then show specs and bundle details, then close trust gaps with shipping and returns.`,
+        ja: `Q. どんな顧客向けですか？\nA. ギフト性、香り体験、リフィル構造を一緒に求める顧客向けです。\n\nQ. どの情報を先に見せるべきですか？\nA. Heroで購入理由、中盤で仕様と構成、下部で配送・返品を提示する順序が有効です。`,
+        zh: `Q. 这款产品适合谁？\nA. 适合重视礼赠价值、香气体验和补充装逻辑的用户。\n\nQ. 页面上应先展示什么？\nA. 先放购买理由，其次展示规格与组合信息，最后用物流与退换建立信任。`
+      }),
+      localizedPhrase(code, {
+        ko: `지금 상세페이지에서 향 옵션, 구성품, 배송 조건을 확인하고 ${m.country} 시장용 카피 버전으로 전환해 보세요.`,
+        en: `Use the detail page to compare scent options, bundle details, and shipping terms for the ${m.country} market.`,
+        ja: `${m.country} 市場向けに、香り・構成・配送条件を確認できる詳細ページ導線を配置してください。`,
+        zh: `引导用户查看详情页中的香型、组合与配送条件，并切换为 ${m.country} 市场版文案。`
+      }),
+      localizedPhrase(code, {
+        ko: `향 / 선물 / 리필 / 배송 신뢰를 네 개의 카드 블록으로 분리해 보여 주는 배너 카피`,
+        en: `Banner copy direction: split scent, gifting, refill logic, and shipping trust into four quick cards`,
+        ja: `バナー文案方向: 香り・ギフト・リフィル・配送信頼を4つのカードで分けて見せる`,
+        zh: `横幅文案方向：把香气、礼赠、补充装和配送信任拆成四个卡片块`
+      })
+    ];
+  }
+
+  function buildShortformPack(s, p, m, brief) {
+    const b = brandOf(s);
+    const code = marketLangCode(m);
+    return [
+      localizedPhrase(code, {
+        ko: `0~3초: ${p.features[2] || p.features[0]}이 먼저 보이는 언박싱 컷으로 시작`,
+        en: `0-3 sec: open on the detail that makes the bundle instantly feel gift-ready`,
+        ja: `0〜3秒: ギフト性が一目で伝わるディテールから開始`,
+        zh: `0-3秒：先用一眼就能看懂礼赠价值的细节镜头开场`
+      }),
+      localizedPhrase(code, {
+        ko: `0-3초 훅: 패키지 전체 실루엣 + 키링 디테일\n4-7초: 향 옵션 3종을 빠르게 스와이프\n8-11초: 리필 구조를 손동작으로 설명\n12-15초: 배송/구성 확인 CTA\n연출 메모: ${brief}`,
+        en: `0-3 sec hook: full package silhouette + key charm detail\n4-7 sec: fast scent option swipe\n8-11 sec: show the refill structure by hand\n12-15 sec: CTA to check bundle + shipping\nDirection note: ${brief}`,
+        ja: `0〜3秒: パッケージ全体 + キーチャーム\n4〜7秒: 香り3種を素早く提示\n8〜11秒: 手元でリフィル構造を見せる\n12〜15秒: 構成と配送確認CTA\n演出メモ: ${brief}`,
+        zh: `0-3秒：整套包装 + 挂件细节\n4-7秒：快速切换3种香型\n8-11秒：用手部动作说明补充装结构\n12-15秒：引导查看组合与物流\n拍摄备注：${brief}`
+      }),
+      localizedPhrase(code, {
+        ko: `- 탑샷 1컷\n- 패키지 클로즈업 2컷\n- 향 옵션 스와치 3컷\n- 리필 구조 설명 컷 1컷\n- CTA 엔드카드 1컷`,
+        en: `- 1 top shot\n- 2 package closeups\n- 3 scent option swatches\n- 1 refill explanation shot\n- 1 CTA end card`,
+        ja: `- トップショット 1컷\n- パッケージ寄り 2컷\n- 香り見せ 3컷\n- リフィル説明 1컷\n- CTAエンドカード 1컷`,
+        zh: `- 顶视镜头 1个\n- 包装特写 2个\n- 香型展示 3个\n- 补充装说明 1个\n- CTA 尾卡 1个`
+      }),
+      localizedPhrase(code, {
+        ko: `자막 1: 선물처럼 바로 이해되는 구성\n자막 2: 향 옵션을 고르는 재미\n자막 3: 리필 구조로 오래 쓰는 경험\n자막 4: ${m.country} 배송 정보는 상세페이지에서 확인`,
+        en: `Caption 1: A bundle that reads like a gift instantly\nCaption 2: Scent options worth comparing\nCaption 3: Refill logic that supports repeat use\nCaption 4: Check ${m.country} shipping details on the product page`,
+        ja: `字幕1: ギフトとしてすぐ伝わる構成\n字幕2: 香りを選ぶ楽しさ\n字幕3: 長く使えるリフィル構造\n字幕4: ${m.country} 向け配送情報は詳細ページで確認`,
+        zh: `字幕1：一眼就懂的礼赠组合\n字幕2：值得比较的香型选择\n字幕3：支持长期使用的补充装逻辑\n字幕4：${m.country} 物流信息请看详情页`
+      }),
+      localizedPhrase(code, {
+        ko: `${m.country} 시장용 상세페이지에서 향 옵션과 배송 조건을 바로 확인하세요.`,
+        en: `Check scent options and shipping terms for the ${m.country} market on the detail page.`,
+        ja: `${m.country} 向け詳細ページで香りと配送条件を確認してください。`,
+        zh: `请在 ${m.country} 市场版详情页中查看香型与物流条件。`
+      }),
+      `${b.name} shortform thumbnail, ${p.name}, gift-ready unboxing, refill detail visible, clean premium beauty visual`
+    ];
+  }
+
+  function buildFaqPack(s, p, m, brief) {
+    const code = marketLangCode(m);
+    return [
+      localizedPhrase(code, {
+        ko: `배송 문의 / 구성 문의 / 향 옵션 문의 / B2B 대량 문의`,
+        en: `Shipping / bundle details / scent options / B2B bulk inquiry`,
+        ja: `配送 / 構成 / 香りオプション / B2B大量問い合わせ`,
+        zh: `物流咨询 / 组合内容 / 香型选择 / B2B 批量咨询`
+      }),
+      localizedPhrase(code, {
+        ko: `${p.name}는 ${p.shipping} 기준으로 발송되며, ${p.returns} 조건 안에서 반품 안내가 가능합니다. 구성과 향 옵션은 상세페이지 기준으로 안내해 주세요. ${brief}`,
+        en: `${p.name} ships on a ${p.shipping} timeline and follows ${p.returns} for returns. Please guide customers using the product page as the source of truth for bundle contents and scent options. ${brief}`,
+        ja: `${p.name} は ${p.shipping} を基準に発送し、返品は ${p.returns} に従って案内します。構成と香りオプションは詳細ページ基準で案内してください。${brief}`,
+        zh: `${p.name} 按 ${p.shipping} 的时效发货，退换请按 ${p.returns} 说明。组合与香型选项请以详情页信息为准。${brief}`
+      }),
+      localizedPhrase(code, {
+        ko: `${p.shipping} 기준으로 발송됩니다. 상세페이지에서 구성과 향 옵션을 먼저 확인해 주세요.`,
+        en: `It ships on a ${p.shipping} timeline. Please check the detail page first for bundle details and scent options.`,
+        ja: `${p.shipping} を基準に発送します。構成と香りは詳細ページを先にご確認ください。`,
+        zh: `按 ${p.shipping} 发货。请先在详情页确认组合与香型选项。`
+      }),
+      localizedPhrase(code, {
+        ko: `문의 주셔서 감사합니다. 현재 ${p.shipping} 기준으로 배송되며, 반품은 ${p.returns} 정책에 따라 안내됩니다. 상세페이지 기준으로 향 옵션과 구성품을 함께 확인해 주시면 가장 정확합니다.`,
+        en: `Thank you for your inquiry. The current shipping timeline is ${p.shipping}, and returns follow ${p.returns}. The most accurate reference for scent options and bundle components is the detail page.`,
+        ja: `お問い合わせありがとうございます。現在の配送目安は ${p.shipping}、返品は ${p.returns} 方針に沿って案内しています。香りと構成品は詳細ページ確認が最も正確です。`,
+        zh: `感谢咨询。当前配送时效为 ${p.shipping}，退换按 ${p.returns} 政策执行。香型与组合内容请以详情页信息为准。`
+      }),
+      localizedPhrase(code, {
+        ko: `재고 확인, 대량 주문, 현지 유통 문의가 들어오면 담당자에게 이관합니다.`,
+        en: `Escalate stock checks, bulk order questions, and local distribution inquiries to the account owner.`,
+        ja: `在庫確認、大量注文、現地流通の問い合わせは担当者へエスカレーションします。`,
+        zh: `库存确认、批量订单与当地分销咨询请升级给负责人处理。`
+      })
+    ];
+  }
+
+  function buildInfluencerPack(s, p, m, brief) {
+    const b = brandOf(s);
+    const code = marketLangCode(m);
+    return [
+      localizedPhrase(code, {
+        ko: `안녕하세요. ${m.country} 시장에서 감각적인 선물형 뷰티 콘텐츠를 만드는 크리에이터를 찾고 있어 연락드립니다. ${b.name}의 ${p.name}는 ${p.features[2] || p.features[0]}와 ${p.features[3] || p.features[1]}를 함께 보여 주기 좋은 제품입니다.`,
+        en: `Hello, we are reaching out because we are looking for creators who make refined, giftable beauty content for the ${m.country} market. ${b.name}'s ${p.name} works well because it shows both the gift-ready angle and the refillable product logic clearly.`,
+        ja: `こんにちは。${m.country} 市場向けに、感度の高いギフト系ビューティーコンテンツを制作される方を探しており、ご連絡しました。${b.name} の ${p.name} はギフト性とリフィル価値を同時に見せやすい製品です。`,
+        zh: `您好。我们正在寻找适合 ${m.country} 市场的礼赠型美妆内容创作者，因此联系您。${b.name} 的 ${p.name} 能同时展示礼赠价值与补充装逻辑，非常适合内容合作。`
+      }),
+      localizedPhrase(code, {
+        ko: `지난 메시지에 이어 간단히 한 번 더 공유드립니다. 이 제품은 언박싱, 향 비교, 리필 구조 설명까지 한 영상 안에서 자연스럽게 연결되는 점이 강점입니다.`,
+        en: `Following up with one more short note: the product works especially well for content that combines unboxing, scent comparison, and a refill explanation in one flow.`,
+        ja: `追って簡単に補足いたします。本製品は、開封、香り比較、リフィル説明を1本の流れで見せやすい点が強みです。`,
+        zh: `补充说明一下，这款产品特别适合把开箱、香型比较和补充装说明放进同一条内容里。`
+      }),
+      localizedPhrase(code, {
+        ko: `- 선물 개봉 순간이 강함\n- 향/패키지/리필 구조를 분리해 설명 가능\n- ${m.country} 타깃용 cross-border 배송 신뢰 메시지 연결 가능\n- 추가 요청: ${brief}`,
+        en: `- Strong gifting/unboxing moment\n- Scent, packaging, and refill logic can be separated clearly\n- Shipping trust can be connected for the ${m.country} market\n- Requested angle: ${brief}`,
+        ja: `- ギフト開封の瞬間が強い\n- 香り・パッケージ・リフィルを分けて説明できる\n- ${m.country} 向けに配送信頼も接続しやすい\n- 追加要望: ${brief}`,
+        zh: `- 开箱礼赠瞬间强\n- 可将香型、包装和补充装逻辑分开表达\n- 适合接入 ${m.country} 市场的物流信任信息\n- 补充要求：${brief}`
+      }),
+      localizedPhrase(code, {
+        ko: `브랜드 감성만 강조하기보다, 실제 사용 장면과 선물 이유를 함께 보여 주는 협업이 가장 적합합니다.`,
+        en: `The best-fit collaboration is not mood-only content but content that also shows the real use case and gifting reason.`,
+        ja: `ブランド感性だけでなく、使用シーンとギフト理由を一緒に見せる企画が最適です。`,
+        zh: `最适合的合作不是只讲品牌氛围，而是同时展示使用场景与送礼理由。`
+      })
+    ];
+  }
+
+  function buildGuidePack(s, o) {
+    const b = brandOf(s);
+    const p = productOf(s, o.productId);
+    const m = marketOf(s, o.marketId);
+    const code = marketLangCode(m);
+    const prompt = localizedPhrase(code, {
+      ko: `역할: ${m.country} 시장용 ${outputLabel(o.type)} 제작 전문가\n브랜드 Truth: ${b.story}\n브랜드 톤: ${b.tone}\n제품 Truth: ${factSummary(p)}\n시장 메모: ${m.note}\n금지표현: ${b.banned.join(", ")}\n요청 작업: ${o.brief}\n출력 조건:\n1. 플랫폼 구조를 먼저 설계한다.\n2. 감성 표현보다 구매 이유와 사실 정보를 먼저 제시한다.\n3. 과장 표현 없이 배송/반품/옵션 정보를 빠뜨리지 않는다.\n4. 최종안과 대안안 2개를 함께 제시한다.`,
+      en: `Role: specialist for creating ${outputLabel(o.type)} assets for the ${m.country} market\nBrand truth: ${b.story}\nBrand tone: ${b.tone}\nProduct truth: ${factSummary(p)}\nMarket note: ${m.note}\nBanned claims: ${b.banned.join(", ")}\nRequested task: ${o.brief}\nOutput rules:\n1. Design the platform structure first.\n2. Lead with buying reasons and facts before mood.\n3. Include shipping, returns, and option details without exaggeration.\n4. Provide one final draft and two alternatives.`,
+      ja: `役割: ${m.country} 市場向け ${outputLabel(o.type)} 制作の専門家\nブランドTruth: ${b.story}\nブランドトーン: ${b.tone}\n製品Truth: ${factSummary(p)}\n市場メモ: ${m.note}\n禁止表現: ${b.banned.join(", ")}\n依頼内容: ${o.brief}\n出力条件:\n1. 先にプラットフォーム構造を設計する。\n2. 感性より購入理由と事実情報を優先する。\n3. 配送・返品・オプション情報を誇張なく含める。\n4. 最終案1つと代替案2つを提示する。`,
+      zh: `角色：面向 ${m.country} 市场的 ${outputLabel(o.type)} 制作专家\n品牌事实：${b.story}\n品牌语气：${b.tone}\n产品事实：${factSummary(p)}\n市场备注：${m.note}\n禁用表达：${b.banned.join(", ")}\n任务要求：${o.brief}\n输出规则：\n1. 先设计平台结构。\n2. 先讲购买理由和事实，再讲情绪氛围。\n3. 无夸张地包含物流、退换和选项信息。\n4. 给出 1 个主方案和 2 个备选方案。`
+    });
+    return {
+      tools: [
+        "ChatGPT / GPT-5 for structured copy drafting",
+        "Claude for tone cleanup and long-form consistency",
+        "Gemini or Grok for alternative angle comparison"
+      ],
+      checklist: [
+        "브랜드 Truth와 제품 Truth를 먼저 정리했는가",
+        "시장/언어/플랫폼 조건을 명시했는가",
+        "금지표현과 배송/반품 정보를 함께 넣었는가",
+        "최종안 외에 대안안 2개를 받도록 요청했는가"
+      ],
+      prompt,
+      steps: [
+        "Step 1. 제품 Truth, 배송/반품, 시장 메모를 입력값으로 정리합니다.",
+        "Step 2. 아래 프롬프트를 복사해 외부 LLM 또는 디자인 도구에 넣습니다.",
+        "Step 3. 첫 결과가 나오면 플랫폼 구조 누락과 금지표현 여부를 먼저 확인합니다.",
+        "Step 4. 두 번째 라운드에서는 헤드라인, CTA, 배송 신뢰 문장만 별도로 재요청합니다.",
+        "Step 5. 최종안과 대안안 2개를 비교해 가장 전환력이 높은 버전을 채택합니다."
+      ],
+      qa: [
+        `첫 3초 또는 첫 문단에서 ${p.name}의 구매 이유가 바로 보이는가`,
+        `브랜드 감성과 제품 사실이 섞이지 않고 블록 단위로 분리되어 있는가`,
+        `배송, 반품, 옵션, 문의 포인트가 누락되지 않았는가`,
+        `${m.country} 시장의 표현 관습과 톤이 자연스러운가`
+      ]
+    };
+  }
+
   function seedOutputs(s) {
     mkOutput(s, { type: "blog_post", platform: "blog", productId: "p1", marketId: "m1", brief: "일상을 디자인하는 향이라는 메시지를 중심으로 작성", status: "approved" });
     mkOutput(s, { type: "pdp", platform: "shopee", productId: "p1", marketId: "m3", brief: "gift-ready와 delivery trust를 함께 보여주세요.", status: "in_review" });
@@ -193,53 +498,13 @@
   }
 
   function gen(s, type, p, m, brief) {
-    const b = brandOf(s);
     const base = {
-      blog_post: [
-        `1. ${b.preferred[0]}: ${m.country} 시장에 ${p.name}를 소개하는 법`,
-        `${copyOf(s, "story_intro")}`,
-        `### ${b.name}\n\n${b.story}\n\n${p.name}는 ${p.features.slice(0, 3).join(", ")}를 중심으로 ${m.note} 니즈에 대응합니다.\n\n- 스펙: ${p.specs.join(", ")}\n- ${copyOf(s, "shipping")}: ${p.shipping}\n- ${copyOf(s, "returns")}: ${p.returns}\n\n${brief}`,
-        `${b.name} ${p.name}의 향, 선물, 리필 포인트를 ${m.country} 타깃 기준으로 정리한 소개 글.`,
-        `${copyOf(s, "cta")}`,
-        `${b.name} premium still life, ${p.name}, ivory backdrop, gift-ready composition`
-      ],
-      social_post: [
-        `${b.preferred[0]}.`,
-        `${p.name}는 ${p.features[0]}와 ${p.features[2]}를 한 문맥으로 묶어 설명하기 좋습니다. 감성은 유지하고, 판매감은 낮추고, 옵션 정보는 링크로 넘기는 구조가 안정적입니다.`,
-        `${copyOf(s, "gift")}\n향과 리필 경험이 동시에 보이는 제품.`,
-        `어떤 포인트가 가장 끌리는지 댓글로 알려주세요.`,
-        `#exportmarketing #giftablebeauty #kbrand`
-      ],
-      pdp: [
-        `${b.preferred[0]} ${p.name}. ${p.features[2]}와 ${p.features[3]}를 하나의 구매 이유로 정리한 Hero 카피.`,
-        `1. ${p.features[0]}\n2. ${p.features[2]}\n3. ${p.features[3]}`,
-        `- 스펙: ${p.specs.join(", ")}\n- 가격: ${p.price}\n- 옵션: ${p.features.slice(0, 2).join(", ")}`,
-        `배송: ${p.shipping}\n반품: ${p.returns}\n시장 메모: ${m.note}`,
-        `Q. 향 옵션은 어떻게 고르나요?\nA. ${copyOf(s, "detail")}\n\nQ. 선물용 구성이 포함되나요?\nA. 기프트 패키지 구성이 포함됩니다.`,
-        `${copyOf(s, "cta")}`,
-        `향 / 선물 / 키링 포함 구성을 한눈에 보여주는 배너 문안`
-      ],
-      shortform: [
-        `${b.preferred[0]}를 3초 안에 보여주는 탑샷`,
-        `0-3초 언박싱\n4-8초 향 / 키링 디테일\n9-12초 사용 컷\n13-15초 CTA`,
-        `탑샷 / 패키지 클로즈업 / 사용 컷 / 리필 디테일 / 엔드카드`,
-        `선물처럼 바로 설명되는 구성\n리필 가능한 패키지\ncross-border shipping ready`,
-        `링크에서 전체 구성을 확인해 보세요.`,
-        `${b.name} thumbnail, gift-ready hand cream set, key charm visible`
-      ],
-      faq: [
-        `배송 문의 / 옵션 문의 / 선물 포장 문의`,
-        `${p.shipping} 기준으로 발송되며, 옵션과 구성은 상세페이지에서 확인하실 수 있습니다.`,
-        `${p.shipping} 기준으로 발송됩니다.`,
-        `${copyOf(s, "thanks")} ${p.shipping} 기준으로 안내드리고 있으며 자세한 옵션은 상세페이지에서 확인 부탁드립니다.`,
-        `재고 / 대량 주문 / B2B 문의는 운영 담당자에게 이관합니다.`
-      ],
-      influencer: [
-        `안녕하세요. ${m.country} 타깃 라이프스타일 뷰티 브랜드 ${b.name}입니다. ${p.name} 협업을 제안드립니다.`,
-        `${p.features[2]}와 ${p.features[3]} 포인트가 강해 언박싱형 콘텐츠와 잘 맞습니다.`,
-        `언박싱 / 선물 추천 / 향 비교 / 리필 경험`,
-        `${p.name}는 과장 없이 설명 가능한 선물형 제품입니다. ${m.note}`
-      ]
+      blog_post: buildBlogPack(s, p, m, brief),
+      social_post: buildSocialPack(s, p, m, brief),
+      pdp: buildPdpPack(s, p, m, brief),
+      shortform: buildShortformPack(s, p, m, brief),
+      faq: buildFaqPack(s, p, m, brief),
+      influencer: buildInfluencerPack(s, p, m, brief)
     };
     return (base[type] || []).map((content, i) => ({
       id: uid("sec"), name: OUT[type].sections[i] || `Section ${i + 1}`, content, locked: false, human: false, score: 0, issues: []
@@ -299,14 +564,10 @@
   }
 
   function mkGuide(s, o) {
+    const guide = buildGuidePack(s, o);
     s.outputs.unshift({
       id: uid("out"), originId: o.originId || null, version: o.version || 1, mode: "guide", type: o.type, platform: o.platform, productId: o.productId, marketId: o.marketId, brief: o.brief, status: o.status || "generated", at: new Date().toISOString(),
-      guide: {
-        tools: ["Canva + ChatGPT", "Figma + Midjourney/Flux"],
-        prompt: `${brandOf(s).name} ${productOf(s, o.productId).name}, ${marketOf(s, o.marketId).country} 타깃, ${brandOf(s).tone}, ${o.brief}`,
-        steps: ["캔버스 규격 설정", "프롬프트로 2~3개 시안 생성", "브랜드 자산 반영", "QA 체크 후 저장"],
-        qa: ["제품 또는 핵심 오브제가 1초 안에 인지되는가", "카피가 짧고 선명한가", "금지표현을 피했는가"]
-      }
+      guide
     });
   }
 
@@ -372,7 +633,7 @@
   function card(t, v, d) { return `<article class="metric"><div class="eyebrow">${text(t)}</div><strong>${text(v)}</strong><p>${text(d)}</p></article>`; }
   function empty(t) { return `<div class="empty"><p>${text(t)}</p></div>`; }
   function helpView() {
-    return `<section class="panel"><div class="head"><div><div class="eyebrow">사용설명</div><h2>처음부터 끝까지 사용하는 상세 가이드</h2><p>이 프로그램은 브랜드·제품·시장 정보를 구조화한 뒤 생성, 자동 검수, 승인 저장, 새 버전 분기, 테스트 종료 후 보관까지 한 흐름으로 운영하기 위해 설계되었습니다.</p></div></div><div class="stack"><div class="mini big"><strong>1. 대시보드 확인</strong><span>현재 회사, 프로젝트, 준비도, 승인 대기 항목, 최근 결과물을 먼저 확인합니다. 기본 샘플은 VARELI이며 테스트용으로 들어 있습니다.</span></div><div class="mini big"><strong>2. 온보딩 입력</strong><span>회사, 브랜드, 제품, 시장, 금지표현, 자산을 순서대로 입력합니다. 제품과 시장 입력 중에는 임시저장이 유지되어 다음 단계로 이동해도 값이 사라지지 않습니다.</span></div><div class="mini big"><strong>3. Brand / Product Truth 정리</strong><span>브랜드 화면에서는 브랜드 스토리, 톤, 선호 표현, 금지 표현, 용어집을 관리하고 제품 화면에서는 스펙, 배송, 반품, 근거자료를 관리합니다.</span></div><div class="mini big"><strong>4. Output Studio 실행</strong><span>출력물 유형, 플랫폼, 시장, 제품, 추가 요청을 선택합니다. Generate Here는 사이트 내부에서 바로 산출물을 만들고, Guide Me는 외부 툴용 Toolchain Pack을 제공합니다.</span></div><div class="mini big"><strong>5. 결과 검수</strong><span>결과 화면에서는 넓은 반응형 편집창으로 각 섹션을 검토합니다. 잠금한 섹션은 유지되고, 재생성 버튼은 매번 다른 대안 버전으로 다시 생성합니다.</span></div><div class="mini big"><strong>6. 점수와 자동 체크리스트 확인</strong><span>우측 검수 패널에서 자동 체크리스트 PASS/FAIL과 Truth, Brand, Platform, Completeness 점수를 확인합니다. 점수는 무조건 승인 수치가 아니라 어디를 먼저 수정해야 하는지 알려주는 기준입니다.</span></div><div class="mini big"><strong>7. 새 버전 복제 사용법</strong><span>새 버전 복제는 현재 결과를 기준으로 새 작업본을 만들고 검수 상태를 다시 계산하는 기능입니다. 국가별 현지화 버전, 카피 비교 실험, 담당자별 분기 작업에 사용합니다.</span></div><div class="mini big"><strong>8. 승인 저장</strong><span>자동 체크리스트가 모두 PASS이고 점수가 기준 이상일 때만 승인 저장이 가능합니다. 승인 후에는 Gold Sample로 등록해 이후 결과물의 기준 예시로 재사용할 수 있습니다.</span></div><div class="mini big"><strong>9. 샘플 테스트 종료 후 보관</strong><span>VARELI 테스트가 끝나면 대시보드 또는 운영 화면의 ‘DB 보관 및 초기화’ 버튼을 눌러 현재 회사, 브랜드, 제품, 시장, 결과물 전체를 로컬 DB에 보관하고 모든 항목을 빈 값으로 초기화합니다.</span></div><div class="mini big"><strong>10. 실제 운영 시작</strong><span>초기화가 끝나면 빈 워크스페이스에서 실제 회사 데이터를 입력해 운영을 시작하면 됩니다. 로그인만 제외하면 같은 흐름으로 계속 사용할 수 있습니다.</span></div></div></section>`;
+    return `<section class="panel"><div class="head"><div><div class="eyebrow">사용설명</div><h2>처음부터 끝까지 쓰는 상세 운영 가이드</h2><p>이 프로그램의 목적은 “그럴듯한 한 편의 글”이 아니라 플랫폼별로 바로 사용할 수 있는 Asset Pack을 만드는 것입니다. 아래 순서를 그대로 따라가면 블로그, 상세페이지, 쇼츠, FAQ, 아웃리치 메시지를 같은 Truth에서 분기 생산할 수 있습니다.</p></div></div><div class="stack"><div class="mini big"><strong>1. 대시보드에서 현재 상태를 먼저 읽습니다.</strong><span>좌측은 작업공간과 권한, 중앙은 생성/승인 흐름, 우측은 현재 브랜드 운영 요약을 보여 줍니다. 샘플 상태에서는 VARELI 데이터가 들어 있고, 실제 운영을 시작할 때는 테스트 종료 후 DB 보관 및 초기화를 누르면 됩니다.</span></div><div class="mini big"><strong>2. 온보딩에서는 “예쁜 소개”보다 Truth를 먼저 넣습니다.</strong><span>회사명, 업종, 프로젝트를 넣은 뒤 브랜드 스토리와 톤을 정리합니다. 예를 들어 VARELI라면 “향과 오브제를 통해 일상을 디자인하는 라이프스타일 뷰티 브랜드”처럼 정체성을 적고, 금지표현에는 “치료, 완치, 즉시 개선”처럼 실제로 쓰면 안 되는 표현을 넣습니다.</span></div><div class="mini big"><strong>3. 제품 단계에서는 판매문구가 아니라 사실 정보로 채웁니다.</strong><span>제품명, 카테고리, 핵심 특징, 스펙, 가격, 배송, 반품을 구조적으로 넣습니다. 좋은 입력 예시는 “30ml x 3”, “EMS / DHL 3~7영업일”, “미개봉 7일 이내”처럼 검수 가능한 사실형 문장입니다. 이 정보가 부족하면 어떤 LLM을 붙여도 결과 품질이 흔들립니다.</span></div><div class="mini big"><strong>4. 시장 단계에서는 국가별 메시지 우선순위를 분리합니다.</strong><span>예를 들어 미국은 “giftable beauty, portable luxury”, 일본은 “정갈한 톤, 선물 문화 강조”, 싱가포르는 “Shopee 문법, delivery trust 강조”처럼 적습니다. 같은 제품이라도 국가 메모가 다르면 블로그 제목, 상세페이지 Hero, 쇼츠 훅이 달라져야 정상입니다.</span></div><div class="mini big"><strong>5. Studio에서는 산출물 유형과 플랫폼을 함께 고릅니다.</strong><span>블로그를 고르면 검색 유입과 SEO 구조가 중요하고, 상세페이지를 고르면 Hero, 스펙, 배송/반품, FAQ 완결성이 더 중요합니다. 쇼츠를 고르면 3초 훅과 샷리스트, 자막 가독성이 핵심입니다. 추가 요청에는 “향/선물/키링을 분리해 설명”, “일본 시장용으로 정갈하게”, “배송 신뢰를 앞에 배치”처럼 구체적 지시를 넣습니다.</span></div><div class="mini big"><strong>6. Generate Here 결과는 섹션별로 읽고 고칩니다.</strong><span>예를 들어 블로그 결과라면 제목 3안, 개요, 본문, 메타, CTA, 이미지 프롬프트가 나옵니다. 본문이 약하면 본문만 재생성하고, 배송/반품 문구가 맞으면 그 섹션은 잠금합니다. 이렇게 해야 좋은 섹션은 보존하고 약한 섹션만 개선할 수 있습니다.</span></div><div class="mini big"><strong>7. 점수는 “합격증”이 아니라 수정 우선순위입니다.</strong><span>우측 Review Gate에는 Truth, Brand, Platform, Completeness 점수와 자동 체크리스트가 나옵니다. 예를 들어 Truth가 낮으면 스펙, 배송, 반품, 옵션 정보가 약한 것이고, Platform이 낮으면 채널 구조나 CTA가 맞지 않는 경우가 많습니다. 점수만 높고 결과가 약하게 느껴지면, 먼저 어떤 섹션이 왜 점수를 받았는지 같이 봐야 합니다.</span></div><div class="mini big"><strong>8. 새 버전 복제는 비교 실험용입니다.</strong><span>상단의 “새 버전 복제”를 누르면 현재 결과를 기준으로 새 작업본이 만들어집니다. 예를 들어 같은 상세페이지를 미국용과 일본용으로 나누거나, 블로그 글을 “브랜드 스토리형”과 “검색 전환형” 두 버전으로 운영할 때 씁니다. 복제 후에는 각 버전의 CTA, Hero, 제목 전략을 अलग로 수정해 비교하면 됩니다.</span></div><div class="mini big"><strong>9. Guide Me는 외부 도구 작업을 더 잘 시키기 위한 화면입니다.</strong><span>유튜브 썸네일이나 배너처럼 외부 툴이 더 적합한 작업은 Guide Me를 선택합니다. 여기서는 추천 툴, 복사 가능한 프롬프트, 입력 체크리스트, 제작 순서, QA 기준이 함께 나옵니다. 이 기능의 목적은 “LLM에게 그냥 써 줘”가 아니라 “구조화된 요청으로 더 좋은 결과를 끌어내기”입니다.</span></div><div class="mini big"><strong>10. 실제 예시: 미국 시장용 블로그 글 만들기</strong><span>온보딩에 제품 Truth와 미국 시장 메모를 넣고, Studio에서 블로그/Blog/미국/해당 제품을 선택합니다. 추가 요청에 “선물성, 리필 구조, 배송 신뢰를 분리하고 SEO 관점 제목 3개로 시작”이라고 쓰면 결과에서는 제목 3안, 검색 의도 개요, 정보형 본문, 메타디스크립션, CTA, 대표 이미지 프롬프트가 같이 나옵니다. 그 후 본문만 재생성해 “브랜드 스토리형”과 “검색 전환형” 두 버전을 비교할 수 있습니다.</span></div><div class="mini big"><strong>11. 실제 예시: Shopee 상세페이지 만들기</strong><span>Studio에서 상세페이지/Shopee/싱가포르를 선택하고 추가 요청에 “delivery trust를 앞에 배치하고 옵션과 배송/반품을 명확히”라고 적습니다. 그러면 Hero는 구매 이유 중심, Benefit 블록은 기능 분리형, 스펙은 사실형, 배송/반품은 신뢰형, FAQ는 구매 불안 해소형으로 읽으면 좋습니다. 여기서 약한 부분만 재생성하고 나머지는 잠금하면 훨씬 안정적으로 완성됩니다.</span></div><div class="mini big"><strong>12. 승인과 보관</strong><span>자동 체크리스트가 모두 PASS이고 점수가 기준 이상이면 승인 저장합니다. 승인 후에는 Gold Sample로 등록해 다음 유사 작업의 기준 예시로 재사용할 수 있습니다. 테스트가 끝나면 DB 보관 및 초기화를 눌러 현재 샘플 데이터를 보관하고 빈 워크스페이스에서 실제 회사 데이터를 입력하면 됩니다.</span></div></div></section>`;
   }
 
   function onboard() {
@@ -413,7 +674,7 @@
 
   function guideView() {
     const o = current(); if (!o || o.mode !== "guide") return `<section class="panel">${empty("선택된 Guide Me 결과가 없습니다.")}</section>`;
-    return `<section class="panel"><div class="head"><div><div class="eyebrow">${t("guide")}</div><h2>${text(outputLabel(o.type))} · ${text(product(o.productId).name)}</h2></div><span class="pill">${text(labelText(o.status))}</span></div><div class="split"><article class="subcard"><div class="eyebrow">${l()==="ko"?"추천 툴":l()==="en"?"Recommended Tools":l()==="ja"?"推奨ツール":"推荐工具"}</div>${o.guide.tools.map((t) => `<div class="mini">${text(t)}</div>`).join("")}</article><article class="subcard"><div class="eyebrow">${l()==="ko"?"프롬프트":l()==="en"?"Prompt":l()==="ja"?"プロンプト":"提示词"}</div><textarea readonly id="guidePrompt">${text(o.guide.prompt)}</textarea><div class="actions"><button class="secondary" data-copy="guidePrompt">${l()==="ko"?"복사":l()==="en"?"Copy":l()==="ja"?"コピー":"复制"}</button></div></article></div><article class="panel"><div class="head"><div><div class="eyebrow">${l()==="ko"?"제작 순서 & QA":l()==="en"?"Process & QA":l()==="ja"?"制作手順 & QA":"制作步骤与 QA"}</div><h3>Toolchain Pack</h3></div></div><ol>${o.guide.steps.map((s) => `<li>${text(s)}</li>`).join("")}</ol><ul>${o.guide.qa.map((q) => `<li>${text(q)}</li>`).join("")}</ul></article></section>`;
+    return `<section class="panel"><div class="head"><div><div class="eyebrow">${t("guide")}</div><h2>${text(outputLabel(o.type))} · ${text(product(o.productId).name)}</h2></div><span class="pill">${text(labelText(o.status))}</span></div><div class="split"><article class="subcard"><div class="eyebrow">${l()==="ko"?"추천 툴":l()==="en"?"Recommended Tools":l()==="ja"?"推奨ツール":"推荐工具"}</div>${o.guide.tools.map((t) => `<div class="mini">${text(t)}</div>`).join("")}<div class="sub"><strong>${l()==="ko"?"입력 체크리스트":l()==="en"?"Input Checklist":l()==="ja"?"入力チェック":"输入清单"}</strong>${(o.guide.checklist || []).map((item) => `<div class="mini">${text(item)}</div>`).join("")}</div></article><article class="subcard"><div class="eyebrow">${l()==="ko"?"프롬프트":l()==="en"?"Prompt":l()==="ja"?"プロンプト":"提示词"}</div><textarea readonly id="guidePrompt" class="result-textarea compact">${text(o.guide.prompt)}</textarea><div class="actions"><button class="secondary" data-copy="guidePrompt">${l()==="ko"?"복사":l()==="en"?"Copy":l()==="ja"?"コピー":"复制"}</button></div></article></div><article class="panel"><div class="head"><div><div class="eyebrow">${l()==="ko"?"제작 순서 & QA":l()==="en"?"Process & QA":l()==="ja"?"制作手順 & QA":"制作步骤与 QA"}</div><h3>Toolchain Pack</h3></div></div><ol>${o.guide.steps.map((s) => `<li>${text(s)}</li>`).join("")}</ol><ul>${o.guide.qa.map((q) => `<li>${text(q)}</li>`).join("")}</ul></article></section>`;
   }
 
   function repoView() {
@@ -565,19 +826,43 @@
   function lockToggle(key) { const [oid, sid] = key.split(":"); const s = state.outputs.find((x)=>x.id===oid)?.sections.find((x)=>x.id===sid); if (s) s.locked = !s.locked; }
   function regenVariant(o, s) {
     const p = product(o.productId), m = market(o.marketId);
+    const turn = (s.regenCount || 0) % 3;
     const variants = {
-      "제목 3안": [`1. ${brand().preferred[1]}: ${m.country} 시장용 ${p.name}`, `2. ${p.features[2]}를 먼저 보여주는 ${p.name}`, `3. ${brand().name}가 선물 경험을 설계하는 방식`],
-      "개요": [`브랜드 스토리와 판매 포인트를 분리한 뒤, 시장별 구매 포인트를 다시 묶는 구조로 재정리합니다.`, `${m.country} 타깃 기준으로 gift-ready, refill, delivery trust 순으로 메시지 우선순위를 바꿉니다.`],
-      "본문": [`${brand().name}는 ${p.features.join(", ")}를 중심으로 ${m.note} 수요에 대응합니다.\n\n이번 버전은 브랜드 감성보다 구매 판단에 필요한 사실 정보와 활용 장면을 먼저 보여줍니다.`, `브랜드 스토리보다 제품 Truth를 전면에 배치한 버전입니다.\n\n- 스펙: ${p.specs.join(", ")}\n- 배송: ${p.shipping}\n- 반품: ${p.returns}\n\n마지막 문단에서만 감성 문맥을 붙입니다.`],
-      "Hero": [`${p.features[2]}와 ${p.features[3]}를 한 줄로 요약한 전환형 Hero 카피.`, `${m.country} 시장용으로 선물 포인트와 배송 신뢰를 먼저 제시하는 Hero 카피.`],
-      "3초 훅": [`언박싱 대신 키링 디테일로 시작하는 3초 훅`, `첫 1초에 패키지 전체 실루엣을 보여주는 탑샷 훅`]
+      "제목 3안": [
+        `1. ${m.country} 시장에서 먼저 읽히는 ${p.name} 제목 구조\n2. 선물형 구매 이유를 먼저 보여주는 ${brand().name} 카피\n3. 향보다 구성과 리필 가치를 앞세운 SEO 제목`,
+        `1. ${p.name}: ${m.country} 바이어가 바로 이해하는 gift-ready hand care\n2. ${brand().name}가 향, 선물, 리필을 한 문장으로 정리하는 법\n3. 검색 유입용으로 다시 쓴 ${p.name} 제목 3안`,
+        `1. ${p.features[2] || p.features[0]}이 먼저 보이는 ${p.name}\n2. ${m.country} 시장용 전환형 블로그 제목\n3. 브랜드 감성보다 구매 이유를 먼저 주는 카피`
+      ],
+      "개요": [
+        `이번 버전은 검색 의도와 구매 이유를 앞에 놓고, 브랜드 스토리는 중반 이후로 미룹니다. ${m.country} 시장에서는 ${m.note} 문맥이 CTA보다 먼저 이해되어야 합니다.`,
+        `개요 구조를 “문제 인식 -> 제품 Truth -> 시장 적합성 -> 배송 신뢰 -> CTA” 순으로 재조정합니다. 이렇게 해야 감성 문장보다 구매 판단 정보가 먼저 보입니다.`,
+        `브랜드 소개형이 아니라 바이어 설득형 개요로 바꿉니다. 핵심은 gift-ready, refill, shipping trust 세 블록을 섞지 않고 분리하는 것입니다.`
+      ],
+      "본문": [
+        `## 검색 유입형 본문\n${p.name}를 찾는 사용자는 감성적인 설명보다 “왜 이 구성이 필요한가”를 먼저 확인합니다.\n\n### 제품 사실\n- 스펙: ${p.specs.join(", ")}\n- 가격: ${p.price}\n- 배송: ${p.shipping}\n- 반품: ${p.returns}\n\n### 시장 적합성\n${m.country} 시장에서는 ${m.note} 포인트를 먼저 보여 주는 편이 구매 장벽을 낮춥니다.\n\n### 결론\n브랜드 스토리는 후반부에서 보강하고, 구매 이유는 전반부에서 확정합니다.`,
+        `## 전환 중심 본문\n${brand().name}의 장점은 감성 그 자체보다 ${p.features[2] || p.features[0]}와 ${p.features[3] || p.features[1]}를 하나의 구매 스토리로 묶을 수 있다는 점입니다.\n\n1. 첫 블록: 선물 이유\n2. 두 번째 블록: 향과 사용 경험\n3. 세 번째 블록: 배송/반품 신뢰\n4. 마지막 블록: CTA\n\n추가 요청 반영: ${o.brief}`,
+        `## 바이어 설명형 본문\n이 버전은 브랜드 철학보다 제품 Truth를 먼저 제시합니다.\n\n${p.name}는 ${benefitSummary(p)}를 중심으로 설계되었고, ${m.country} 시장에서는 ${m.note} 메시지가 특히 중요합니다.\n\n실무에서는 본문 중간에 FAQ 링크와 상세페이지 이동 CTA를 넣어 정보 탐색 흐름을 끊지 않는 편이 좋습니다.`
+      ],
+      "Hero": [
+        `${p.features[2] || p.features[0]}를 첫 줄에 배치하고, 두 번째 줄에서 ${p.shipping} 기반 배송 신뢰를 보강하는 Hero 버전`,
+        `${brand().name} ${p.name}: 선물 이유는 앞에, 브랜드 감성은 뒤에 두는 전환형 Hero`,
+        `${m.country} 시장용 Hero. 핵심 구매 이유를 한 줄, 옵션/배송 신뢰를 보조 문장으로 분리`
+      ],
+      "3초 훅": [
+        `패키지 전체보다 ${p.features[2] || p.features[0]} 디테일을 먼저 보여주는 3초 훅`,
+        `첫 1초에 손에 잡히는 사용 장면을 넣고, 2~3초에 리필 구조를 암시하는 훅`,
+        `${m.country} 타깃용으로 배송 신뢰보다 선물 장면을 먼저 열어 주는 훅`
+      ]
     };
-    const list = variants[s.name] || [`대안 버전 ${Date.now() % 1000}: 브랜드 문맥과 구매 포인트의 순서를 바꿔 다시 작성합니다.`];
-    const next = list[(Date.now() + s.content.length) % list.length];
-    return Array.isArray(next) ? next.join("\n") : next;
+    const list = variants[s.name] || [
+      `대안 버전 A: 브랜드 설명을 줄이고 구매 이유를 앞에 배치합니다.`,
+      `대안 버전 B: 시장 적합성 문장을 보강하고 정보형 구조로 다시 씁니다.`,
+      `대안 버전 C: 배송/반품/구성 정보를 더 선명하게 보이도록 재정리합니다.`
+    ];
+    return list[turn % list.length];
   }
   function refreshOutputQuality(o) { const q = score(o.type, o.sections, brand().banned); o.score = q.overall; o.status = q.state; o.rubric = q.rubric; o.checklist = buildChecklist(o); }
-  function regen(key) { const [oid, sid] = key.split(":"); const o = state.outputs.find((x)=>x.id===oid); const s = o?.sections.find((x)=>x.id===sid); if (s && !s.locked) { s.content = regenVariant(o, s); s.human = false; refreshOutputQuality(o); ping("섹션을 재생성했습니다."); } }
+  function regen(key) { const [oid, sid] = key.split(":"); const o = state.outputs.find((x)=>x.id===oid); const s = o?.sections.find((x)=>x.id===sid); if (s && !s.locked) { s.regenCount = (s.regenCount || 0) + 1; s.content = regenVariant(o, s); s.human = false; refreshOutputQuality(o); ping("섹션을 재생성했습니다."); } }
   function editSection(oid, sid, content) { const o = state.outputs.find((x)=>x.id===oid); const s = o?.sections.find((x)=>x.id===sid); if (s) { s.content = content; s.human = true; refreshOutputQuality(o); ping("섹션 수정을 저장했습니다."); } }
   function approve(id) { const o = state.outputs.find((x)=>x.id===id); if (!o) return; if (o.checklist.some((x)=>!x.done) || o.score < 85 || o.sections.some((s)=>s.issues.some((i)=>i.includes("금지표현")))) return ping("자동 체크리스트를 모두 통과하고 85점 이상이어야 승인할 수 있습니다."); o.status = "approved"; state.logs.unshift(log("결과물 승인", `${outputLabel(o.type)} 결과물을 승인했습니다.`)); ping("승인 저장이 완료되었습니다."); }
   function duplicate(id) { const src = state.outputs.find((x)=>x.id===id); if (!src) return; const cp = JSON.parse(JSON.stringify(src)); cp.id = uid("out"); cp.originId = src.id; cp.version = (src.version || 1) + 1; cp.status = cp.mode === "generate" ? "in_review" : "generated"; cp.at = new Date().toISOString(); if (cp.mode==="generate") refreshOutputQuality(cp); state.outputs.unshift(cp); state.ui.activeOutput = cp.id; state.ui.view = cp.mode==="generate" ? "result" : "guide_result"; ping("새 버전을 복제했습니다. 현재 결과를 기준으로 새 작업본이 생성되었습니다."); }
