@@ -18,8 +18,8 @@
     showFatal(reason);
   });
 
-  const KEY = "emh-prd2-lite-v5";
-  const BUILD = "2026.03.14.3";
+  const KEY = "emh-prd2-lite-v6";
+  const BUILD = "2026.03.16.1";
   const NAV = [
     ["dashboard", "Dashboard"],
     ["help", "Help"],
@@ -121,14 +121,18 @@
         ]
       },
       playbooks: [
-        { id: "pb1", platform: "smartstore", type: "pdp", tone: "정제된 전환형", req: ["Hero", "베네핏", "스펙", "배송/반품", "FAQ"], banned: ["완치", "즉시 개선"], ver: "1.4.0" },
-        { id: "pb2", platform: "threads", type: "social_post", tone: "대화형", req: ["훅", "본문", "CTA"], banned: ["100%"], ver: "1.2.1" },
-        { id: "pb3", platform: "tiktok", type: "shortform", tone: "빠른 훅", req: ["3초 훅", "콘티", "CTA"], banned: ["기적"], ver: "1.1.4" }
+        { id: "pb1", platform: "smartstore", type: "pdp", tone: "정제된 전환형", req: ["Hero", "베네핏", "스펙", "배송/반품", "FAQ"], banned: ["완치", "즉시 개선"], priority: ["구매 이유", "구성/옵션", "스펙/가격", "배송/반품", "FAQ", "CTA"], cta: ["옵션 확인", "구성 비교", "배송 조건 확인"], warnings: ["과장 효능 표현 금지", "경쟁사 직접 비교 금지"], localization: "모바일 기준 짧은 문단과 가격/배송 정보의 빠른 노출이 중요함", checklist: ["Hero에서 구매 이유가 바로 보이는가", "배송/반품이 누락되지 않았는가", "옵션 구조가 명확한가"], ver: "1.4.0" },
+        { id: "pb2", platform: "blog", type: "blog_post", tone: "검색 유입형", req: ["제목 3안", "개요", "본문", "메타", "CTA"], banned: ["근거 없는 1위 주장"], priority: ["SEO 제목", "검색 의도", "제품 Truth", "시장 적합성", "브랜드 연결", "CTA"], cta: ["상세페이지 이동", "옵션 비교", "문의 유도"], warnings: ["긴 도입부 금지", "브랜드 스토리 과다 노출 금지"], localization: "모바일에서 끊어 읽기 좋은 소제목 구조 필요", checklist: ["본문에 스펙/배송 등 사실 정보가 있는가", "제목과 메타가 검색 의도에 맞는가"], ver: "1.3.2" },
+        { id: "pb3", platform: "threads", type: "social_post", tone: "대화형", req: ["훅", "본문", "CTA"], banned: ["100%"], priority: ["첫 문장", "한 문장 설명", "대화 유도", "CTA"], cta: ["답글 유도", "링크 이동", "선호 포인트 질문"], warnings: ["판매 압박형 문구 금지"], localization: "짧은 호흡과 반응 유도형 문장이 중요함", checklist: ["첫 문장이 짧고 강한가", "반복 표현이 없는가"], ver: "1.2.1" },
+        { id: "pb4", platform: "tiktok", type: "shortform", tone: "빠른 훅", req: ["3초 훅", "콘티", "CTA"], banned: ["기적"], priority: ["첫 1초 시각 정보", "3초 훅", "콘티 전개", "CTA"], cta: ["상세페이지 확인", "구성 확인", "저장/공유 유도"], warnings: ["첫 장면 설명 과다 금지", "텍스트 과밀 금지"], localization: "자막 길이는 짧고 오버레이는 1~2줄 내로 유지", checklist: ["첫 3초에 제품 이유가 보이는가", "자막이 과밀하지 않은가"], ver: "1.1.4" },
+        { id: "pb5", platform: "youtube", type: "thumbnail", tone: "시각 집중형", req: ["추천 툴", "프롬프트", "제작 순서", "QA"], banned: ["낚시형 과장 카피"], priority: ["핵심 오브제", "짧은 카피", "색 대비", "시선 유도"], cta: ["클릭 유도", "핵심 차별점 강조"], warnings: ["텍스트 과다 금지", "제품 미노출 금지"], localization: "작은 화면에서도 첫 시선에 오브제가 읽혀야 함", checklist: ["핵심 오브제가 1초 안에 보이는가", "카피가 짧고 명확한가"], ver: "1.0.8" }
       ],
       bundles: [
-        { id: "bu1", name: "smartstore_pdp_global", label: "스마트스토어 PDP", type: "pdp", platform: "smartstore", ver: "2.6.3", score: 92, draft: "Role -> Situation -> Audience -> Inputs -> Steps -> Style -> Forbidden -> Output Format 순으로 상세페이지를 설계한다. Hero에는 구매 이유, 중간에는 스펙/옵션, 하단에는 배송/반품/FAQ를 둔다." },
-        { id: "bu2", name: "threads_export_brand", label: "Threads / X", type: "social_post", platform: "threads", ver: "2.2.0", score: 89, draft: "훅 -> 설명 -> 반응 유도 -> CTA 순으로 짧게 설계한다. 감성은 유지하되, 과장 문구와 반복 카피는 제거한다." },
-        { id: "bu3", name: "shortform_storyboard_tiktok", label: "Shortform Storyboard", type: "shortform", platform: "tiktok", ver: "1.9.7", score: 87, draft: "3초 훅 -> 15초 콘티 -> 샷리스트 -> 자막 -> CTA 순으로 작성한다. 첫 장면에서 제품의 구매 이유가 보이도록 한다." }
+        { id: "bu1", name: "smartstore_pdp_global", label: "스마트스토어 PDP", type: "pdp", platform: "smartstore", ver: "2.6.3", score: 92, draft: "Role -> Situation -> Audience -> Inputs -> Steps -> Style -> Forbidden -> Output Format 순으로 상세페이지를 설계한다. Hero에는 구매 이유, 중간에는 스펙/옵션, 하단에는 배송/반품/FAQ를 둔다.", modes: { planning: "구매 이유와 우선 메시지 순서를 정한다.", drafting: "Hero/베네핏/스펙/FAQ 초안을 만든다.", polishing: "모바일 가독성과 문장 길이를 정리한다.", reviewing: "금지표현과 누락 정보를 검수한다.", packaging: "최종 Asset Pack으로 묶는다." }, layers: ["system", "brand", "market", "platform", "output"] },
+        { id: "bu2", name: "blog_seo_export", label: "SEO Blog Pack", type: "blog_post", platform: "blog", ver: "2.3.1", score: 90, draft: "검색 의도와 제품 Truth를 앞에 두고, 브랜드 스토리는 후반에서 보강한다. 제목/개요/본문/메타/CTA를 하나의 SEO 팩으로 만든다.", modes: { planning: "검색 키워드와 제목 전략을 정한다.", drafting: "개요와 본문을 정보형 구조로 작성한다.", polishing: "메타와 CTA를 다듬는다.", reviewing: "과장, 반복, 키워드 남용을 점검한다.", packaging: "블로그용 Asset Pack으로 정리한다." }, layers: ["system", "industry", "brand", "market", "output"] },
+        { id: "bu3", name: "threads_export_brand", label: "Threads / X", type: "social_post", platform: "threads", ver: "2.2.0", score: 89, draft: "훅 -> 설명 -> 반응 유도 -> CTA 순으로 짧게 설계한다. 감성은 유지하되, 과장 문구와 반복 카피는 제거한다.", modes: { planning: "첫 문장과 반응 유도 포인트를 정한다.", drafting: "짧은문장 구조로 본문을 쓴다.", polishing: "과장 표현과 장황함을 제거한다.", reviewing: "반복과 판매 압박을 체크한다.", packaging: "게시용 카피와 대안안을 묶는다." }, layers: ["system", "brand", "market", "platform", "output"] },
+        { id: "bu4", name: "shortform_storyboard_tiktok", label: "Shortform Storyboard", type: "shortform", platform: "tiktok", ver: "1.9.7", score: 87, draft: "3초 훅 -> 15초 콘티 -> 샷리스트 -> 자막 -> CTA 순으로 작성한다. 첫 장면에서 제품의 구매 이유가 보이도록 한다.", modes: { planning: "첫 3초 훅과 장면 흐름을 정한다.", drafting: "콘티, 샷리스트, 자막 초안을 만든다.", polishing: "자막 길이와 리듬을 조정한다.", reviewing: "첫 장면 명확성, 과밀 자막 여부를 점검한다.", packaging: "스토리보드 팩으로 정리한다." }, layers: ["system", "brand", "market", "platform", "output"] },
+        { id: "bu5", name: "thumbnail_prompt_youtube", label: "Thumbnail Prompt", type: "thumbnail", platform: "youtube", ver: "1.4.4", score: 88, draft: "핵심 오브제, 짧은 카피, 배경 대비, 감정 톤을 먼저 정한 뒤 이미지 프롬프트로 변환한다.", modes: { planning: "핵심 오브제와 클릭 포인트를 정한다.", drafting: "썸네일 프롬프트와 카피안을 만든다.", polishing: "텍스트 길이와 색 대비를 다듬는다.", reviewing: "낚시성 과장과 제품 미노출을 점검한다.", packaging: "툴별 프롬프트와 QA를 정리한다." }, layers: ["system", "brand", "market", "platform", "output"] }
       ],
       outputs: [],
       gold: [],
@@ -311,6 +315,17 @@
     return [b.name, p.name, m.country, p.cat, "giftable beauty", "refillable", "K-beauty export"].filter(Boolean);
   }
 
+  function primaryPlatform(type) {
+    return {
+      pdp: "smartstore",
+      blog_post: "blog",
+      social_post: "threads",
+      shortform: "tiktok",
+      thumbnail: "youtube",
+      banner: "smartstore"
+    }[type] || "";
+  }
+
   function outputFormatGuide(type) {
     return {
       blog_post: "핵심 요약 -> SEO 제목 -> 메타 설명 -> 본문 -> CTA -> 이미지 프롬프트",
@@ -327,6 +342,8 @@
   function guidanceFrame(type, s, p, m, brief, profile) {
     const b = brandOf(s);
     const keywords = seoKeywords(b, p, m).slice(0, 5).join(", ");
+    const pb = playbookOf(s, type, primaryPlatform(type));
+    const bu = bundleOf(s, type, primaryPlatform(type));
     return {
       role: `너는 ${outputLabel(type)} 전용 전략가이자 SEO/전환 최적화 기획자다.`,
       situation: `브랜드 톤을 유지하되 ${m.country} 시장에서 바로 사용할 수 있는 ${outputLabel(type)} 초안을 만든다. 모바일 가독성과 플랫폼 문법을 우선한다.`,
@@ -334,18 +351,22 @@
       inputs: [`제품명: ${p.name}`, `핵심 특징: ${benefitSummary(p)}`, `차별점: ${p.features[2] || p.features[0]}`, `시장 메모: ${m.note}`, `추가 요청: ${brief || "없음"}`],
       steps: [
         "입력된 제품 정보를 먼저 요약한다.",
-        "플랫폼 구조와 표현 방식의 장점을 먼저 설계한다.",
+        `플랫폼 구조와 표현 방식의 장점을 먼저 설계한다.${pb ? ` 우선 메시지 순서: ${pb.priority.join(" -> ")}` : ""}`,
         "제품 기능을 고객 혜택 중심으로 재해석한다.",
         "사용 장면과 구매 이유를 연결하는 스토리텔링 문단을 넣는다.",
         `SEO 키워드(${keywords})를 자연스럽게 분산 배치한다.`,
         "모바일에서 읽기 좋게 짧은 문단과 명확한 소제목을 사용한다.",
         `최종 결과를 ${outputFormatGuide(type)} 순으로 정리한다.`
       ],
-      style: [toneGuide(profile), mannerGuide(profile), "과장 광고처럼 보이는 표현은 피하고 전문 용어는 바로 풀어서 설명한다."],
+      style: [toneGuide(profile), mannerGuide(profile), "과장 광고처럼 보이는 표현은 피하고 전문 용어는 바로 풀어서 설명한다.", pb ? `플레이북 톤: ${pb.tone}` : "", bu ? `번들 작성 원칙: ${bu.draft}` : ""].filter(Boolean),
       forbidden: [
         "사실 확인이 안 되는 성능 표현을 단정하지 않는다.",
         "경쟁사를 직접 언급하거나 깎아내리지 않는다.",
         "불필요하게 긴 문단과 같은 표현 반복을 피한다."
+      ].concat(pb ? pb.warnings : []),
+      review: [
+        ...(pb ? pb.checklist : []),
+        ...(bu && bu.modes ? Object.entries(bu.modes).map(([mode, desc]) => `${mode}: ${desc}`) : [])
       ]
     };
   }
@@ -604,7 +625,7 @@
     const profile = o.profile || resolveProfile(o.rawProfile, m, b);
     const frame = guidanceFrame(o.type, s, p, m, o.brief, profile);
     const prompt = localizedPhrase(code, {
-      ko: `1. 역할 정의\n${frame.role}\n\n2. 상황 설명\n${frame.situation}\n\n3. 목표 독자 정의\n${frame.audience}\n\n4. 입력값 정의\n${frame.inputs.map((item, index) => `${index + 1}. ${item}`).join("\n")}\n\n5. 작업 지시\n${frame.steps.map((step, index) => `${index + 1}. ${step}`).join("\n")}\n\n6. 스타일 가이드\n${frame.style.map((item) => `- ${item}`).join("\n")}\n\n7. 금지사항\n${frame.forbidden.map((item) => `- ${item}`).join("\n")}\n\n8. 출력 형식\n${outputFormatGuide(o.type)}\n\n브랜드 톤앤매너 선택값: ${profileLabel("brandTone", profile.brandTone)}\n사용자 연령대 선택값: ${profileLabel("audienceAge", profile.audienceAge)}\n표현 방식 선택값: ${profileLabel("expressionStyle", profile.expressionStyle)}\n시장 메모: ${m.note}\n금지표현: ${b.banned.join(", ")}`,
+      ko: `1. 역할 정의\n${frame.role}\n\n2. 상황 설명\n${frame.situation}\n\n3. 목표 독자 정의\n${frame.audience}\n\n4. 입력값 정의\n${frame.inputs.map((item, index) => `${index + 1}. ${item}`).join("\n")}\n\n5. 작업 지시\n${frame.steps.map((step, index) => `${index + 1}. ${step}`).join("\n")}\n\n6. 스타일 가이드\n${frame.style.map((item) => `- ${item}`).join("\n")}\n\n7. 금지사항\n${frame.forbidden.map((item) => `- ${item}`).join("\n")}\n\n8. 검수 포인트\n${frame.review.map((item) => `- ${item}`).join("\n")}\n\n9. 출력 형식\n${outputFormatGuide(o.type)}\n\n브랜드 톤앤매너 선택값: ${profileLabel("brandTone", profile.brandTone)}\n사용자 연령대 선택값: ${profileLabel("audienceAge", profile.audienceAge)}\n표현 방식 선택값: ${profileLabel("expressionStyle", profile.expressionStyle)}\n시장 메모: ${m.note}\n금지표현: ${b.banned.join(", ")}`,
       en: `Role: specialist for creating ${outputLabel(o.type)} assets for the ${m.country} market\nBrand truth: ${b.story}\nBrand tone: ${b.tone}\nProduct truth: ${factSummary(p)}\nMarket note: ${m.note}\nBanned claims: ${b.banned.join(", ")}\nRequested task: ${o.brief}\nOutput rules:\n1. Design the platform structure first.\n2. Lead with buying reasons and facts before mood.\n3. Include shipping, returns, and option details without exaggeration.\n4. Provide one final draft and two alternatives.`,
       ja: `役割: ${m.country} 市場向け ${outputLabel(o.type)} 制作の専門家\nブランドTruth: ${b.story}\nブランドトーン: ${b.tone}\n製品Truth: ${factSummary(p)}\n市場メモ: ${m.note}\n禁止表現: ${b.banned.join(", ")}\n依頼内容: ${o.brief}\n出力条件:\n1. 先にプラットフォーム構造を設計する。\n2. 感性より購入理由と事実情報を優先する。\n3. 配送・返品・オプション情報を誇張なく含める。\n4. 最終案1つと代替案2つを提示する。`,
       zh: `角色：面向 ${m.country} 市场的 ${outputLabel(o.type)} 制作专家\n品牌事实：${b.story}\n品牌语气：${b.tone}\n产品事实：${factSummary(p)}\n市场备注：${m.note}\n禁用表达：${b.banned.join(", ")}\n任务要求：${o.brief}\n输出规则：\n1. 先设计平台结构。\n2. 先讲购买理由和事实，再讲情绪氛围。\n3. 无夸张地包含物流、退换和选项信息。\n4. 给出 1 个主方案和 2 个备选方案。`
@@ -690,13 +711,14 @@
   }
 
   function buildChecklist(row) {
+    const pb = playbook(row.type, row.platform) || state.playbooks.find((x) => x.type === row.type);
     return [
       { id: uid("c"), label: "금지표현 없음", done: !row.sections.some((s) => s.issues.some((i) => i.includes("금지표현"))) },
       { id: uid("c"), label: "섹션 최소 길이 충족", done: row.sections.every((s) => s.content.length >= 24) },
       { id: uid("c"), label: "핵심 사실 정보 포함", done: row.sections.some((s) => /배송|shipping|반품|return|스펙|spec/.test(s.content)) },
       { id: uid("c"), label: "점수 85점 이상", done: row.score >= 85 },
       { id: uid("c"), label: "플랫폼 핵심 섹션 포함", done: row.sections.length >= OUT[row.type].sections.length }
-    ];
+    ].concat((pb?.checklist || []).map((item) => ({ id: uid("c"), label: item, done: row.score >= 75 })));
   }
 
   function mkOutput(s, o) {
@@ -837,12 +859,12 @@
 
   function playbookView() {
     const pb = state.playbooks.find((x)=>x.id===state.ui.playbookId) || state.playbooks[0];
-    return `<section class="split"><article class="panel"><div class="head"><div><div class="eyebrow">${t("playbooks")}</div><h2>Platform Playbook Center</h2></div></div>${state.playbooks.map((x)=>`<button class="row-main ${x.id===pb.id?"sel":""}" data-playbook="${x.id}"><strong>${text(labelText(x.platform))}</strong><span>${text(outputLabel(x.type))} · v${text(x.ver)}</span></button>`).join("")}</article><article class="panel"><div class="head"><div><div class="eyebrow">Rule Set</div><h2>${text(labelText(pb.platform))}</h2><p>플레이북은 톤, 연령대, 표현 방식 선택값과 함께 읽혀야 합니다. 선택하지 않으면 시장 기본 프로필이 적용됩니다.</p></div><span class="pill">v${text(pb.ver)}</span></div><form data-form="playbookEdit"><input type="hidden" name="id" value="${pb.id}">${field("tone","권장 톤",pb.tone)}${area("req","필수 섹션",pb.req.join(", "))}${area("banned","금지 표현",pb.banned.join(", "))}<button class="primary">플레이북 저장</button></form></article></section>`;
+    return `<section class="split"><article class="panel"><div class="head"><div><div class="eyebrow">${t("playbooks")}</div><h2>Platform Playbook Center</h2></div></div>${state.playbooks.map((x)=>`<button class="row-main ${x.id===pb.id?"sel":""}" data-playbook="${x.id}"><strong>${text(labelText(x.platform))}</strong><span>${text(outputLabel(x.type))} · v${text(x.ver)}</span></button>`).join("")}</article><article class="panel"><div class="head"><div><div class="eyebrow">Rule Set</div><h2>${text(labelText(pb.platform))}</h2><p>플레이북은 톤, 연령대, 표현 방식 선택값과 함께 읽혀야 합니다. 선택하지 않으면 시장 기본 프로필이 적용됩니다.</p></div><span class="pill">v${text(pb.ver)}</span></div><div class="mini big"><strong>우선 메시지 순서</strong><span>${(pb.priority || []).join(" -> ")}</span></div><div class="mini big"><strong>CTA 패턴</strong><span>${(pb.cta || []).join(", ")}</span></div><div class="mini big"><strong>운영 경고</strong><span>${(pb.warnings || []).join(" / ")}</span></div><div class="mini big"><strong>사람 검수 기준</strong><span>${(pb.checklist || []).join(" / ")}</span></div><form data-form="playbookEdit"><input type="hidden" name="id" value="${pb.id}">${field("tone","권장 톤",pb.tone)}${area("req","필수 섹션",pb.req.join(", "))}${area("banned","금지 표현",pb.banned.join(", "))}<button class="primary">플레이북 저장</button></form></article></section>`;
   }
 
   function promptView() {
     const bu = state.bundles.find((x)=>x.id===state.ui.bundleId) || state.bundles[0];
-    return `<section class="split"><article class="panel"><div class="head"><div><div class="eyebrow">프롬프트</div><h2>Prompt Stack Studio</h2></div></div>${state.bundles.map((x)=>`<button class="row-main ${x.id===bu.id?"sel":""}" data-bundle="${x.id}"><strong>${text(x.label)}</strong><span>${text(x.name)} · v${text(x.ver)}</span></button>`).join("")}</article><article class="panel"><div class="head"><div><div class="eyebrow">Layer Draft</div><h2>${text(bu.label)}</h2><p>모든 산출물은 Role, Situation, Audience, Inputs, Steps, Style, Forbidden, Output Format 프레임으로 프롬프트를 설계합니다.</p></div><span class="score ${bu.score>=85?"ok":bu.score>=70?"mid":"bad"}">${bu.score}</span></div><form data-form="bundleEdit"><input type="hidden" name="id" value="${bu.id}">${area("draft","Draft Prompt",bu.draft)}<button class="primary">Draft 저장</button></form><div class="actions"><button class="secondary" data-test="${bu.id}">샌드박스 테스트</button><button class="ghost" data-deploy="${bu.id}">승인 배포</button></div></article></section>`;
+    return `<section class="split"><article class="panel"><div class="head"><div><div class="eyebrow">프롬프트</div><h2>Prompt Stack Studio</h2></div></div>${state.bundles.map((x)=>`<button class="row-main ${x.id===bu.id?"sel":""}" data-bundle="${x.id}"><strong>${text(x.label)}</strong><span>${text(x.name)} · v${text(x.ver)}</span></button>`).join("")}</article><article class="panel"><div class="head"><div><div><div class="eyebrow">Layer Draft</div><h2>${text(bu.label)}</h2><p>모든 산출물은 Role, Situation, Audience, Inputs, Steps, Style, Forbidden, Output Format 프레임으로 프롬프트를 설계합니다.</p></div><span class="score ${bu.score>=85?"ok":bu.score>=70?"mid":"bad"}">${bu.score}</span></div></div><div class="mini big"><strong>활성 레이어</strong><span>${(bu.layers || []).join(" -> ")}</span></div><div class="mini big"><strong>운영 모드</strong><span>${Object.entries(bu.modes || {}).map(([mode, desc]) => `${mode}: ${desc}`).join(" / ")}</span></div><form data-form="bundleEdit"><input type="hidden" name="id" value="${bu.id}">${area("draft","Draft Prompt",bu.draft)}<button class="primary">Draft 저장</button></form><div class="actions"><button class="secondary" data-test="${bu.id}">샌드박스 테스트</button><button class="ghost" data-deploy="${bu.id}">승인 배포</button></div></article></section>`;
   }
 
   function qualityView() {
@@ -856,7 +878,7 @@
 
   function aside(v) {
     const o = current();
-    if (v === "result" && o && o.mode === "generate") return `<section class="panel sticky"><div class="eyebrow">Review Gate</div><h3>${t("review_gate")}</h3>${o.checklist.map((c)=>`<div class="check"><span>${text(c.label)}</span><span class="${c.done?"score ok":"score bad"}">${c.done?"PASS":"FAIL"}</span></div>`).join("")}<div class="sub"><strong>적용 프로필</strong><div class="mini">브랜드 톤<span>${text(profileLabel("brandTone", (o.profile || {}).brandTone))}</span></div><div class="mini">연령대<span>${text(profileLabel("audienceAge", (o.profile || {}).audienceAge))}</span></div><div class="mini">표현 방식<span>${text(profileLabel("expressionStyle", (o.profile || {}).expressionStyle))}</span></div></div><div class="sub"><strong>Score Rubric</strong><div class="mini">Truth<span>${o.rubric.truth}</span></div><div class="mini">Brand<span>${o.rubric.brand}</span></div><div class="mini">Platform<span>${o.rubric.platform}</span></div><div class="mini">Completeness<span>${o.rubric.completeness}</span></div></div><div class="sub"><strong>점수 기준</strong><div class="mini">85점 이상 + 체크리스트 전부 PASS<span>승인 가능</span></div><div class="mini">70~84점<span>수정 후 재검토</span></div><div class="mini">69점 이하 또는 금지표현 포함<span>재작성 필요</span></div></div><div class="sub"><strong>금지표현</strong>${brand().banned.map((x)=>`<span class="chip">${text(x)}</span>`).join("")}</div></section>`;
+    if (v === "result" && o && o.mode === "generate") return `<section class="panel sticky"><div class="eyebrow">Review Gate</div><h3>${t("review_gate")}</h3>${o.checklist.map((c)=>`<div class="check"><span>${text(c.label)}</span><span class="${c.done?"score ok":"score bad"}">${c.done?"PASS":"FAIL"}</span></div>`).join("")}<div class="sub"><strong>적용 프로필</strong><div class="mini">브랜드 톤<span>${text(profileLabel("brandTone", (o.profile || {}).brandTone))}</span></div><div class="mini">연령대<span>${text(profileLabel("audienceAge", (o.profile || {}).audienceAge))}</span></div><div class="mini">표현 방식<span>${text(profileLabel("expressionStyle", (o.profile || {}).expressionStyle))}</span></div></div><div class="sub"><strong>플레이북 우선순위</strong><div class="mini">${text(((playbook(o.type, o.platform) || {}).priority || []).join(" -> ") || "기본 우선순위")}</div></div><div class="sub"><strong>번들 모드</strong>${Object.entries((bundle(o.type, o.platform) || {}).modes || {}).map(([mode, desc])=>`<div class="mini">${text(mode)}<span>${text(desc)}</span></div>`).join("") || `<div class="mini">기본 모드<span>planning -> drafting -> reviewing</span></div>`}</div><div class="sub"><strong>Score Rubric</strong><div class="mini">Truth<span>${o.rubric.truth}</span></div><div class="mini">Brand<span>${o.rubric.brand}</span></div><div class="mini">Platform<span>${o.rubric.platform}</span></div><div class="mini">Completeness<span>${o.rubric.completeness}</span></div></div><div class="sub"><strong>점수 기준</strong><div class="mini">85점 이상 + 체크리스트 전부 PASS<span>승인 가능</span></div><div class="mini">70~84점<span>수정 후 재검토</span></div><div class="mini">69점 이하 또는 금지표현 포함<span>재작성 필요</span></div></div><div class="sub"><strong>금지표현</strong>${brand().banned.map((x)=>`<span class="chip">${text(x)}</span>`).join("")}</div></section>`;
     return `<section class="panel sticky"><div class="eyebrow">운영 컨텍스트</div><h3>${text(brand().name)} 운영 요약</h3><div class="mini">브랜드 톤<span>${text(brand().tone)}</span></div><div class="mini">핵심 금지표현<span>${text(brand().banned.slice(0,3).join(", "))}</span></div><div class="mini">다음 권장 액션<span>온보딩 보완 · 승인본 확보 · Gold Sample 확장</span></div><div class="sub"><strong>샘플 테스트 종료</strong><div class="mini">VARELI 테스트가 끝나면 현재 데이터 전체를 로컬 DB에 보관하고 빈 워크스페이스로 초기화할 수 있습니다.</div><div class="actions"><button class="ghost" type="button" data-archive-demo>DB 보관 및 초기화</button></div></div></section>`;
   }
 
