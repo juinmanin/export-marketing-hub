@@ -1,11 +1,11 @@
-const CACHE_NAME = "export-marketing-hub-v3";
+const CACHE_NAME = "export-marketing-hub-v5";
 const ASSETS = [
   "./",
   "./index.html",
-  "./index.html?v=20260316-1",
-  "./styles.css?v=20260316-1",
-  "./app.js?v=20260316-1",
-  "./manifest.webmanifest?v=20260316-1"
+  "./index.html?v=20260316-3",
+  "./styles.css?v=20260316-3",
+  "./app.js?v=20260316-3",
+  "./manifest.webmanifest?v=20260316-3"
 ];
 
 self.addEventListener("install", (event) => {
