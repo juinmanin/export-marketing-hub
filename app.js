@@ -19,7 +19,7 @@
   });
 
   const KEY = "emh-prd2-lite-v7";
-  const BUILD = "2026.03.16.3";
+  const BUILD = "2026.03.16.4";
   const NAV = [
     ["dashboard", "Dashboard"],
     ["help", "Help"],
@@ -745,9 +745,11 @@
 
   function seedOutputs(s) {
     mkOutput(s, { type: "blog_post", platform: "blog", productId: "p1", marketId: "m1", brief: "일상을 디자인하는 향이라는 메시지를 중심으로 작성", status: "approved" });
+    mkOutput(s, { type: "blog_post", platform: "blog", productId: "p2", marketId: "m4", brief: "네이버 검색 유입 기준으로 선물 이유, 구성품, 배송 신뢰를 순서대로 보여 주세요.", status: "approved" });
     mkOutput(s, { type: "pdp", platform: "smartstore", productId: "p1", marketId: "m4", brief: "네이버 검색 유입 기준으로 선물 이유, 후기 신뢰, 배송/반품 근거를 먼저 배치해 주세요.", status: "approved" });
     mkOutput(s, { type: "pdp", platform: "shopee", productId: "p1", marketId: "m3", brief: "gift-ready와 delivery trust를 함께 보여주세요.", status: "in_review" });
     mkOutput(s, { type: "shortform", platform: "tiktok", productId: "p2", marketId: "m1", brief: "팝업 기프트 세트 런칭용 15초 훅", status: "revision_required", bad: "피부를 즉시 개선하는 향기 루틴" });
+    mkOutput(s, { type: "shortform", platform: "shorts", productId: "p2", marketId: "m4", brief: "선물 언박싱과 구성품 비교가 바로 보이는 한국 시장용 쇼츠로 구성해 주세요.", status: "approved" });
     mkGuide(s, { type: "thumbnail", platform: "youtube", productId: "p1", marketId: "m1", brief: "향 / 선물 / 리필 포인트가 동시에 보이게", status: "approved" });
   }
 
@@ -812,6 +814,66 @@
 
   function visualAssets(o) {
     return (o.sections || []).filter((section) => /이미지 프롬프트|썸네일 프롬프트|배너 문안/.test(section.name));
+  }
+
+  function uploadChunks(o) {
+    const s = sectionMap(o);
+    const p = product(o.productId);
+    if (o.type === "blog_post") {
+      const titles = titleOptions(s["제목 3안"]);
+      const mainTitle = titles[0] || p.name;
+      const altTitles = titles.slice(1).map((title) => `- ${title}`).join("\n");
+      return [
+        { key: "blog-title", label: "블로그 제목", value: mainTitle },
+        { key: "blog-meta", label: "메타 설명", value: s["메타"] || "" },
+        { key: "blog-body", label: "블로그 본문", value: `${s["개요"] || ""}\n\n${s["본문"] || ""}\n\n${s["CTA"] || ""}`.trim() },
+        { key: "blog-alt", label: "대체 제목 2안", value: altTitles || "추가 대체 제목 없음" },
+        { key: "blog-image", label: "대표 이미지 프롬프트", value: s["이미지 프롬프트"] || "" }
+      ];
+    }
+    if (o.type === "pdp") {
+      const productDesc = [
+        s["Hero"] || "",
+        "",
+        "상품 소개",
+        s["베네핏"] || "",
+        "",
+        "상품 정보",
+        s["스펙"] || "",
+        "",
+        "배송 및 반품 안내",
+        s["배송/반품"] || "",
+        "",
+        "자주 묻는 질문",
+        s["FAQ"] || "",
+        "",
+        "구매 유도 문구",
+        s["CTA"] || ""
+      ].join("\n").trim();
+      return [
+        { key: "pdp-hero", label: "스마트스토어 상단 헤드라인", value: s["Hero"] || p.name },
+        { key: "pdp-body", label: "상세페이지 본문 블록", value: productDesc },
+        { key: "pdp-faq", label: "FAQ 블록", value: s["FAQ"] || "" },
+        { key: "pdp-banner", label: "배너 문안", value: s["배너 문안"] || "" },
+        { key: "pdp-cta", label: "하단 CTA", value: s["CTA"] || "" }
+      ];
+    }
+    if (o.type === "shortform") {
+      return [
+        { key: "short-hook", label: "촬영 오프닝 대사", value: s["3초 훅"] || "" },
+        { key: "short-script", label: "15초 촬영 스크립트", value: s["15초 콘티"] || "" },
+        { key: "short-captions", label: "영상 자막 세트", value: s["자막"] || "" },
+        { key: "short-shots", label: "샷리스트", value: s["샷리스트"] || "" },
+        { key: "short-thumb", label: "썸네일 프롬프트", value: s["썸네일 프롬프트"] || "" }
+      ];
+    }
+    if (o.type === "social_post") {
+      return [
+        { key: "social-main", label: "게시용 본문", value: `${s["훅"] || ""}\n\n${s["본문"] || ""}\n\n${s["CTA"] || ""}\n\n${s["해시태그"] || ""}`.trim() },
+        { key: "social-alt", label: "대체 카피", value: s["대안 카피"] || "" }
+      ];
+    }
+    return (o.sections || []).map((section) => ({ key: section.id, label: section.name, value: section.content }));
   }
 
   function compiledOutput(o) {
@@ -999,7 +1061,8 @@
   function resultView() {
     const o = current(); if (!o || o.mode !== "generate") return `<section class="panel">${empty("선택된 Generate Here 결과가 없습니다.")}</section>`;
     const visuals = visualAssets(o);
-    return `<section class="panel"><div class="head"><div><div class="eyebrow">${t("generated")}</div><h2>${text(outputLabel(o.type))} · ${text(product(o.productId).name)}</h2><p>${text(labelText(o.platform))} · Prompt v${text(o.bundle)} · Playbook v${text(o.playbook)}</p></div><span class="score ${o.score>=85?"ok":o.score>=70?"mid":"bad"}">${o.score}점</span></div><div class="mini action-note"><strong>적용 프로필</strong><span>${text(profileSummary(o.profile || resolveProfile(o.rawProfile, market(o.marketId), brand())))}</span><span>현재 버전 ${o.version || 1}${o.originId ? ` · 원본 ${o.originId}` : ""}</span></div><div class="mini action-note"><strong>${t("duplicate")}</strong><span>현재 결과를 기준으로 검수 상태를 다시 계산한 새 작업본을 만듭니다. 국가별 현지화, 카피 실험, 담당자별 분기 작업에 사용합니다.</span></div><div class="actions"><button class="primary" data-approve="${o.id}">${t("approve")}</button><button class="secondary" data-duplicate="${o.id}">${t("duplicate")}</button><button class="ghost" data-gold="${o.id}">${t("gold")}</button></div></section><section class="panel"><div class="head"><div><div class="eyebrow">실전형 렌더</div><h3>카드형 최종 미리보기</h3></div></div>${renderedPreviewHtml(o)}</section><section class="split"><article class="panel"><div class="head"><div><div class="eyebrow">바로 복사 가능한 최종본</div><h3>게시용 / 등록용 완성본</h3></div></div><div class="assembled-output">${compiledOutputHtml(o)}</div></article><article class="panel"><div class="head"><div><div class="eyebrow">복사용 원문</div><h3>플랫폼에 붙여 넣는 텍스트</h3></div></div><textarea readonly id="compiledOutput" class="result-textarea compact">${text(compiledOutput(o))}</textarea><div class="actions"><button class="secondary" data-copy="compiledOutput">전체 복사</button></div>${visuals.length ? `<div class="sub"><strong>비주얼 프롬프트 / 배너 문안</strong>${visuals.map((section) => `<div class="mini big"><strong>${text(section.name)}</strong><span>${text(section.content)}</span></div>`).join("")}</div>` : ""}</article></section><section class="stack">${o.sections.slice().sort((a,b)=>a.score-b.score).map((s) => `<article class="panel sec ${s.locked?"locked":""}"><div class="head"><div><div class="eyebrow">${text(s.name)}</div><h3>${text(s.name)}</h3></div><div>${s.human?`<span class="pill">${l()==="ko"?"수정 반영됨":l()==="en"?"Edited":l()==="ja"?"修正反映済み":"已人工修改"}</span>`:""}<span class="score ${s.score>=85?"ok":s.score>=70?"mid":"bad"}">${s.score}</span></div></div><div class="issues">${s.issues.length?s.issues.map((i)=>`<span class="issue">${text(i)}</span>`).join(""):`<span class="issue ok">${t("no_issue")}</span>`}</div><form data-form="sectionEdit"><input type="hidden" name="outputId" value="${o.id}"><input type="hidden" name="sectionId" value="${s.id}"><textarea class="result-textarea" name="content" ${s.locked?"readonly":""}>${text(s.content)}</textarea><div class="actions section-actions"><button class="ghost" type="button" data-lock="${o.id}:${s.id}">${s.locked?t("unlock"):t("lock")}</button><button class="secondary" type="button" data-regen="${o.id}:${s.id}" ${s.locked?"disabled":""}>${t("regenerate")}</button><button class="primary" ${s.locked?"disabled":""}>${t("save_edit")}</button></div></form></article>`).join("")}</section>`;
+    const chunks = uploadChunks(o);
+    return `<section class="panel"><div class="head"><div><div class="eyebrow">${t("generated")}</div><h2>${text(outputLabel(o.type))} · ${text(product(o.productId).name)}</h2><p>${text(labelText(o.platform))} · Prompt v${text(o.bundle)} · Playbook v${text(o.playbook)}</p></div><span class="score ${o.score>=85?"ok":o.score>=70?"mid":"bad"}">${o.score}점</span></div><div class="mini action-note"><strong>적용 프로필</strong><span>${text(profileSummary(o.profile || resolveProfile(o.rawProfile, market(o.marketId), brand())))}</span><span>현재 버전 ${o.version || 1}${o.originId ? ` · 원본 ${o.originId}` : ""}</span></div><div class="mini action-note"><strong>${t("duplicate")}</strong><span>현재 결과를 기준으로 검수 상태를 다시 계산한 새 작업본을 만듭니다. 국가별 현지화, 카피 실험, 담당자별 분기 작업에 사용합니다.</span></div><div class="actions"><button class="primary" data-approve="${o.id}">${t("approve")}</button><button class="secondary" data-duplicate="${o.id}">${t("duplicate")}</button><button class="ghost" data-gold="${o.id}">${t("gold")}</button></div></section><section class="panel"><div class="head"><div><div class="eyebrow">실전형 렌더</div><h3>카드형 최종 미리보기</h3></div></div>${renderedPreviewHtml(o)}</section><section class="split"><article class="panel"><div class="head"><div><div class="eyebrow">바로 복사 가능한 최종본</div><h3>게시용 / 등록용 완성본</h3></div></div><div class="assembled-output">${compiledOutputHtml(o)}</div></article><article class="panel"><div class="head"><div><div class="eyebrow">복사용 원문</div><h3>플랫폼에 붙여 넣는 텍스트</h3></div></div><textarea readonly id="compiledOutput" class="result-textarea compact">${text(compiledOutput(o))}</textarea><div class="actions"><button class="secondary" data-copy="compiledOutput">전체 복사</button></div>${visuals.length ? `<div class="sub"><strong>비주얼 프롬프트 / 배너 문안</strong>${visuals.map((section) => `<div class="mini big"><strong>${text(section.name)}</strong><span>${text(section.content)}</span></div>`).join("")}</div>` : ""}</article></section><section class="panel"><div class="head"><div><div class="eyebrow">플랫폼별 업로드 패키지</div><h3>${text(labelText(o.platform))} 업로드용 분리 복사본</h3></div></div><div class="stack">${chunks.map((chunk, index) => `<article class="subcard"><div class="eyebrow">${text(chunk.label)}</div><textarea readonly id="upload-${text(o.id)}-${index}" class="result-textarea compact">${text(chunk.value)}</textarea><div class="actions"><button class="secondary" data-copy="upload-${text(o.id)}-${index}">${text(chunk.label)} 복사</button></div></article>`).join("")}</div></section><section class="stack">${o.sections.slice().sort((a,b)=>a.score-b.score).map((s) => `<article class="panel sec ${s.locked?"locked":""}"><div class="head"><div><div class="eyebrow">${text(s.name)}</div><h3>${text(s.name)}</h3></div><div>${s.human?`<span class="pill">${l()==="ko"?"수정 반영됨":l()==="en"?"Edited":l()==="ja"?"修正反映済み":"已人工修改"}</span>`:""}<span class="score ${s.score>=85?"ok":s.score>=70?"mid":"bad"}">${s.score}</span></div></div><div class="issues">${s.issues.length?s.issues.map((i)=>`<span class="issue">${text(i)}</span>`).join(""):`<span class="issue ok">${t("no_issue")}</span>`}</div><form data-form="sectionEdit"><input type="hidden" name="outputId" value="${o.id}"><input type="hidden" name="sectionId" value="${s.id}"><textarea class="result-textarea" name="content" ${s.locked?"readonly":""}>${text(s.content)}</textarea><div class="actions section-actions"><button class="ghost" type="button" data-lock="${o.id}:${s.id}">${s.locked?t("unlock"):t("lock")}</button><button class="secondary" type="button" data-regen="${o.id}:${s.id}" ${s.locked?"disabled":""}>${t("regenerate")}</button><button class="primary" ${s.locked?"disabled":""}>${t("save_edit")}</button></div></form></article>`).join("")}</section>`;
   }
 
   function guideView() {
