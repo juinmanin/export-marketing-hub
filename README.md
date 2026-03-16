@@ -66,7 +66,14 @@ styles.css               UI 스타일
 manifest.webmanifest     PWA 메타데이터
 sw.js                    서비스 워커
 README.md                프로젝트 소개 문서
+COLLABORATION_2P_GUIDE.md  2인 협업 작업 규칙서
+GIT_BEGINNER_MANUAL.md     초보자용 Git 사용 매뉴얼
 ```
+
+## 협업 문서
+
+- [2인 협업 작업 규칙서](./COLLABORATION_2P_GUIDE.md)
+- [초보자용 Git 사용 매뉴얼](./GIT_BEGINNER_MANUAL.md)
 
 ## 주의 사항
 
